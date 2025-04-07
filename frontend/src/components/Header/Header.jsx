@@ -14,7 +14,7 @@ function Header() {
               alt="ISGA Holdings Logo" 
               className="h-16 w-auto mr-4 transition-all duration-300 group-hover:opacity-90"
             />
-            <h1 className="text-2xl font-bold text-white">ISGA ISGA ENTERPRISE</h1>
+            <h1 className="text-2xl font-bold text-white">ISGA ENTERPRISE</h1>
           </div>
 
           {/* Navigation */}
