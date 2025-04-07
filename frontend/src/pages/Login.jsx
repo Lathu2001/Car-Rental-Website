@@ -64,7 +64,7 @@ export default function Login() {
                 </form>
                 <div className="mt-4 text-sm text-center text-gray-600">
                    <p>Don’t have an account? <a href="/register" className="text-blue-500 underline">Register</a></p> 
-                   <p> Login as Admin <a href="/AdminLogin" className="text-blue-500 underline">Login</a></p>
+                   <p> Login as Admin <a href="/admin-login" className="text-blue-500 underline">Login</a></p>
                 </div>
             </div>
         </div>

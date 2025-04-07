@@ -2,12 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const adminRoutes = require('./routes/admin');
+//const authRoutes = require('./routes/auth');
 const authRoutes = require('./routes/auth');
 const carRoutes = require('./routes/car'); 
 //const bookingRoutes = require('./routes/bookings');
-//const userRoutes = require('./routes/userRoutes');  
+const userRoutes = require('./routes/userRoutes');  
 //const { errorHandler } = require('./services/middleware/errorMiddleware');
-//const reviewRoutes =require('./routes/review') 
+const reviewRoutes =require('./routes/review') 
 require('dotenv').config();
 
 const app = express();
@@ -15,8 +16,8 @@ app.use(express.json());
 
 // ✅ CORS Configuration
 const allowedOrigins = [
-    'http://localhost:5173', // Local frontend
-    'https://your-deployed-frontend.com' // Change this to your actual deployed frontend URL
+    'http://localhost:5173', 
+    'https://your-deployed-frontend.com' 
 ];
 
 app.use(cors({
@@ -49,8 +50,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/cars', carRoutes);
 //app.use("/api/bookings", bookingRoutes);
-//app.use("/api/users", userRoutes);  // Added user routes
-//app.use('/api/review', reviewRoutes);
+app.use("/api/users", userRoutes); 
+app.use('/api/review', reviewRoutes);
 
 // ✅ Start the Server
 const PORT = process.env.PORT || 5000;
