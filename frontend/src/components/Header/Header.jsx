@@ -14,7 +14,7 @@ function Header() {
               alt="ISGA Holdings Logo" 
               className="h-16 w-auto mr-4 transition-all duration-300 group-hover:opacity-90"
             />
-            <h1 className="text-2xl font-bold text-white">ISGA HOLDINGS</h1>
+            <h1 className="text-2xl font-bold text-white">ISGA ISGA ENTERPRISE</h1>
           </div>
 
           {/* Navigation */}
@@ -30,10 +30,10 @@ function Header() {
               </li>
               <li>
                 <Link 
-                  to="/cars" 
+                  to="/Car" 
                   className="text-white hover:text-yellow-300 hover:underline text-lg font-medium px-4 py-2 transition-all duration-300"
                 >
-                  Our Fleet
+                  Cars
                 </Link>
               </li>
               <li>
