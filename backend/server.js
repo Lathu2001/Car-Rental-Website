@@ -4,10 +4,10 @@ const cors = require('cors');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
 const carRoutes = require('./routes/car'); 
-const bookingRoutes = require('./routes/bookings');
-const userRoutes = require('./routes/userRoutes');  
-const { errorHandler } = require('./services/middleware/errorMiddleware');
-const reviewRoutes =require('./routes/review') 
+//const bookingRoutes = require('./routes/bookings');
+//const userRoutes = require('./routes/userRoutes');  
+//const { errorHandler } = require('./services/middleware/errorMiddleware');
+//const reviewRoutes =require('./routes/review') 
 require('dotenv').config();
 
 const app = express();
@@ -49,7 +49,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/cars', carRoutes);
 //app.use("/api/bookings", bookingRoutes);
-app.use("/api/users", userRoutes);  // Added user routes
+//app.use("/api/users", userRoutes);  // Added user routes
 //app.use('/api/review', reviewRoutes);
 
 // ✅ Start the Server

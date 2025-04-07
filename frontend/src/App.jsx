@@ -1,6 +1,6 @@
 import { Routes, Route, BrowserRouter, useLocation } from "react-router-dom";
 import Header from "./components/Header/Header.jsx";
-import UserHeader from "./components/Header/UserHeader.jsx";
+//import UserHeader from "./components/Header/UserHeader.jsx";
 import AdminHeader from "./components/Header/AdminHeader.jsx";
 import Home from "./pages/Home.jsx";
 import Register from "./pages/Register.jsx";
@@ -12,7 +12,7 @@ import AdminLogin from "./pages/AdminLogin.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx"; 
 import EditCar from "./pages/EditCar.jsx";
 import AddCar from "./pages/AddCar.jsx";
-import DeleteCar from "./pages/DeleteCar.jsx";
+//import DeleteCar from "./pages/DeleteCar.jsx";
 //import UserDashboard from "./pages/UserDashboard.jsx";
 //import BookingPage from "./pages/BookingPage.jsx";
 //import UserReviews from "./pages/UserReviews.jsx";
@@ -37,8 +37,8 @@ function AppLayout() {
     location.pathname.startsWith("/admin-about") ||
     location.pathname.startsWith("/admin-home") ||
     location.pathname.startsWith("/add-car") ||
-    location.pathname.startsWith("/edit-car") ||
-    location.pathname.startsWith("/delete-car") ;
+    location.pathname.startsWith("/edit-car") ;
+    //location.pathname.startsWith("/delete-car") ;
     //location.pathname.startsWith("/User-Rewiews") ||
     //location.pathname.startsWith("/account") ||
    // location.pathname.startsWith("/user-detail");
@@ -62,8 +62,8 @@ function AppLayout() {
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/add-car" element={<AddCar />} />
         <Route path="/edit-car/:carId" element={<EditCar />} />
-        <Route path="/delete-car" element={<DeleteCar />} />
-       {/* <Route path="/User-Rewiews" element={<UserReviews/>} />  
+        {/*<Route path="/delete-car" element={<DeleteCar />} />
+        <Route path="/User-Rewiews" element={<UserReviews/>} />  
         <Route path="/account" element={<AdminAccount/>} /> 
         <Route path="/user-detail" element={<UserDetail/>} /> */}
 
