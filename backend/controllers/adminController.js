@@ -2,8 +2,9 @@ const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
-const ADMIN_CODE = 'isgaareyoufree'; // Define the admin code
+const ADMIN_CODE = 'isgaareyoufree';
 
+// Register Admin
 exports.registerAdmin = async (req, res) => {
     const { name, userId, email, password, adminCode } = req.body;
 
@@ -21,30 +22,25 @@ exports.registerAdmin = async (req, res) => {
             name,
             userId,
             email,
-            password,
+            password, // storing plain text (just for dev)
         });
 
         await admin.save();
 
-        // Send confirmation email
         sendConfirmationEmail(email, name);
-
         res.status(201).json({ message: 'Admin registered successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error });
     }
 };
-// Admin Login
+
+// Login Admin
 exports.loginAdmin = async (req, res) => {
     const { email, userId, password } = req.body;
 
     try {
         const admin = await Admin.findOne({ $or: [{ email }, { userId }] });
-        if (!admin) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-
-        if (password !== admin.password) {
+        if (!admin || admin.password !== password) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
@@ -55,30 +51,49 @@ exports.loginAdmin = async (req, res) => {
     }
 };
 
+// Fetch logged-in admin details
+exports.getAdminDetails = async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.admin.id).select('-password');
+        if (!admin) return res.status(404).json({ message: 'Admin not found' });
 
-// Create a transporter for sending emails
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER, // Your email address from the environment
-        pass: process.env.EMAIL_PASS, // Your email password from the environment
-    },
-});
+        res.json(admin);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
-// Function to send confirmation email
-const sendConfirmationEmail = (email, name) => {
-    const mailOptions = {
-        from: 'isgaholding@gmail.com',
-        to: email,
-        subject: 'Registration Successful - ISGA Holding',
-        text: `Dear ${name},\n\nThank you for registering on the ISGA Holding platform.\n\nWe are delighted to have you as part of our community.\n\nBest regards,\nISGA Holding Team`,
-    };
+// Update admin details
+exports.updateAdmin = async (req, res) => {
+    try {
+        const updateFields = {
+            name: req.body.name,
+            userId: req.body.userId,
+            email: req.body.email
+        };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('Error sending email:', error);
-        } else {
-            console.log('Email sent:', info.response);
-        }
-    });
+        const updatedAdmin = await Admin.findByIdAndUpdate(
+            req.admin.id,
+            updateFields,
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedAdmin) return res.status(404).json({ message: 'Admin not found' });
+
+        res.json(updatedAdmin);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Delete admin account
+exports.deleteAdmin = async (req, res) => {
+    try {
+        const deleted = await Admin.findByIdAndDelete(req.admin.id);
+        if (!deleted) return res.status(404).json({ message: 'Admin not found' });
+
+        res.json({ message: 'Admin account deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
 };
