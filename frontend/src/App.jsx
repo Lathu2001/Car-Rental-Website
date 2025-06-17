@@ -62,7 +62,6 @@ function AppLayout() {
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/add-car" element={<AddCar />} />
         <Route path="/edit-car/:carId" element={<EditCar />} />
-        {/*<Route path="/delete-car" element={<DeleteCar />} />*/}
         <Route path="/User-Rewiews" element={<UserReviews/>} />  
          {/*<Route path="/account" element={<AdminAccount/>} /> 
         <Route path="/user-detail" element={<UserDetail/>} /> */}
