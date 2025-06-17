@@ -259,7 +259,13 @@ const AdminAccount = () => {
                     </div>
 
                     {/* Footer */}
-                    
+                    <div className="text-center mt-8">
+                        <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>
+                            Secure admin panel • Last updated: {new Date().toLocaleDateString()}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             <style jsx>{`
                 @keyframes fade-in {
