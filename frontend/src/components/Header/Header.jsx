@@ -32,7 +32,7 @@ function Header() {
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/Car", label: "Cars", icon: Car },
-    { path: "/about", label: "About Us", icon: Info },
+   // { path: "/about", label: "About Us", icon: Info },
   ];
 
   const authItems = [

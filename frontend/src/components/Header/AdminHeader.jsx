@@ -76,7 +76,7 @@ function AdminHeader() {
   const currentPath = location.pathname;
 
   const navItems = [
-    { path: "/admin-home", label: "Dashboard", icon: Home },
+    //{ path: "/admin-home", label: "Dashboard", icon: Home },
     { path: "/admin-dashboard", label: "Fleet", icon: Car },
     { path: "/user-detail", label: "Users", icon: Users },
     { path: "/User-Rewiews", label: "Reviews", icon: Star },

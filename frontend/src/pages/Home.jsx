@@ -197,10 +197,11 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 </button>
               </Link>
-              
+               <Link to="/car" className="animate-fade-in">
               <button className="font-serif px-8 py-4 border-2 border-gray-300 text-gray-700 font-bold rounded-full hover:border-blue-600 hover:text-blue-600 transition-all duration-300 transform hover:scale-105 animate-fade-in">
                 View Fleet
               </button>
+              </Link>
             </div>
 
             {/* Stats */}
@@ -344,10 +345,7 @@ export default function Home() {
                           <h3 className="text-2xl font-bold mb-2 group-hover:text-blue-600 transition-colors duration-300">Premium Sedan</h3>
                           <p className="text-gray-600 mb-4">Perfect for business and leisure travel</p>
                           <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold text-blue-600">$89/day</span>
-                            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300">
-                              Book Now
-                            </button>
+                      
                           </div>
                         </div>
                       </div>
@@ -392,10 +390,6 @@ export default function Home() {
                           <h3 className="text-2xl font-bold mb-2 group-hover:text-pink-600 transition-colors duration-300">Wedding Special</h3>
                           <p className="text-gray-600 mb-4">Make your wedding day unforgettable</p>
                           <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold text-pink-600">$199/day</span>
-                            <button className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-colors duration-300">
-                              Book Now
-                            </button>
                           </div>
                         </div>
                       </div>

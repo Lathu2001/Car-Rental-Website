@@ -170,7 +170,7 @@ function AdminBookings() {
                         </span>
                       </p>
                       <p className="text-slate-800 font-bold text-lg">
-                        Total: <span className="text-green-600">₹{booking.totalAmount}</span>
+                        Total: <span className="text-green-600">Rs .{booking.totalAmount}</span>
                       </p>
                     </div>
                   </div>
