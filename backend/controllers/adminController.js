@@ -86,14 +86,4 @@ exports.updateAdmin = async (req, res) => {
     }
 };
 
-// Delete admin account
-exports.deleteAdmin = async (req, res) => {
-    try {
-        const deleted = await Admin.findByIdAndDelete(req.admin.id);
-        if (!deleted) return res.status(404).json({ message: 'Admin not found' });
 
-        res.json({ message: 'Admin account deleted successfully' });
-    } catch (err) {
-        res.status(500).json({ message: 'Server error' });
-    }
-};
