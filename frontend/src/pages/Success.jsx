@@ -19,6 +19,8 @@ const SuccessPage = () => {
     setParticles(newParticles);
   }, []);
 
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       {/* Animated Background Elements */}
@@ -76,10 +78,13 @@ const SuccessPage = () => {
 
               {/* Action Button */}
               <div className="flex justify-center pt-8">
-                <button className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-12 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <a 
+                  href="/my-booking"
+                  className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-12 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                >
                   <Calendar className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                   <span>View Details</span>
-                </button>
+                </a>
               </div>
 
               {/* Additional Info */}

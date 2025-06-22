@@ -12,18 +12,19 @@ const EditCar = () => {
   const [focusedField, setFocusedField] = useState("");
 
   useEffect(() => {
-    const fetchCar = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/cars/${carId}`);
-        setCar(response.data);
-      } catch (err) {
-        setError("Car not found or server error.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCar();
-  }, [carId]);
+  const fetchCar = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/cars/${carId}`);
+      console.log("Car response:", response.data);
+      setCar(response.data.data); // ✅ Fix here
+    } catch (err) {
+      setError("Car not found or server error.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchCar();
+}, [carId]);
 
   const handleChange = (e) => {
     setCar({ ...car, [e.target.name]: e.target.value });

@@ -59,7 +59,7 @@ const CheckoutForm = ({ totalAmount }) => {
       </div>
       <button type="submit" className="payment-btn">
         <span>💳</span>
-        Pay ₹{totalAmount}
+        Pay Rs. {totalAmount}
       </button>
     </form>
   );
@@ -381,8 +381,8 @@ const BookingPage = () => {
               <div className="spec-item">
                 <div className="spec-icon">⛽</div>
                 <div className="spec-content">
-                  <span className="spec-label">Fu el</span>
-                  <span className="spec-value">{car.fuelCostPerKm} l/km</span>
+                  <span className="spec-label">Fuel</span>
+                  <span className="spec-value">{car.fuelCostPerKm} Km/l</span>
                 </div>
               </div>
               

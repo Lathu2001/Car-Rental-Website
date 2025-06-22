@@ -70,7 +70,6 @@ function AppLayout() {
 
         {/* Admin Routes (Uses AdminHeader) */}
         
-        <Route path="/admin-home" element={<Home />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/add-car" element={<AddCar />} />
         <Route path="/edit-car/:carId" element={<EditCar />} />
