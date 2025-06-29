@@ -268,7 +268,7 @@ const BookingPage = () => {
   };
 
   const totalAmount = car
-    ? days * car.rentPerDay + (formData.driver ? 500 * days : 0)
+    ? days * car.rentPerDay + (formData.driver ? 2500 * days : 0)
     : 0;
 
   const handleConfirm = async (e) => {
