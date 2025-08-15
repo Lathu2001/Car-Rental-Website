@@ -18,9 +18,7 @@ const AdminRegister = () => {
         push: (path) => console.log(`Navigating to: ${path}`)
     };
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  
 
     const handleSubmit = async (e) => {
         e.preventDefault();
