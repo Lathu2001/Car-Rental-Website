@@ -164,17 +164,10 @@ const Car = () => {
                 <img
                   src={car.imageUrl || '/default-car.jpg'}
                   alt={car.model}
-                  className={`w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110 ${
-                    car.isBooked ? "grayscale opacity-60" : ""
-                  }`}
+                  className={`w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110 `}
                 />
                 
-                {/* Booked Badge */}
-                {car.isBooked && (
-                  <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg animate-pulse">
-                    Booked
-                  </div>
-                )}
+             
 
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -214,7 +207,7 @@ const Car = () => {
                 </div>
 
                 {/* Action Button */}
-                {!car.isBooked ? (
+             
                   <Link to={`/book-car/${car.carId}`} className="block">
                     <button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 group">
                       <span className="flex items-center justify-center space-x-2">
@@ -225,14 +218,6 @@ const Car = () => {
                       </span>
                     </button>
                   </Link>
-                ) : (
-                  <button 
-                    disabled 
-                    className="w-full bg-gray-400 text-white py-3 px-6 rounded-xl font-semibold cursor-not-allowed opacity-60"
-                  >
-                    Currently Unavailable
-                  </button>
-                )}
               </div>
             </div>
           ))}
