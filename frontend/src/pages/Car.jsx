@@ -64,17 +64,8 @@ const Car = () => {
                 <img
                   src={car.imageUrl || '/default-car.jpg'}
                   alt={car.model}
-                  className={`w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105 ${
-                    car.isBooked ? "grayscale opacity-60" : ""
-                  }`}
+                  className={`w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105`}
                 />
-                
-                {/* Booked Badge */}
-                {car.isBooked && (
-                  <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                    Booked
-                  </div>
-                )}
               </div>
 
               {/* Car Details - Always Visible */}
@@ -111,8 +102,7 @@ const Car = () => {
                 </div>
 
                 {/* Action Button */}
-                {!car.isBooked ? (
-                  <Link to={`/login`} className="block">
+                                  <Link to={`/login`} className="block">
                     <button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                       <span className="flex items-center justify-center space-x-2">
                         <span>Book Now</span>
@@ -122,14 +112,6 @@ const Car = () => {
                       </span>
                     </button>
                   </Link>
-                ) : (
-                  <button 
-                    disabled 
-                    className="w-full bg-gray-400 text-white py-3 px-6 rounded-xl font-semibold cursor-not-allowed opacity-60"
-                  >
-                    Currently Unavailable
-                  </button>
-                )}
               </div>
             </div>
           ))}
