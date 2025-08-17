@@ -66,7 +66,11 @@ exports.getAdminDetails = async (req, res) => {
 // Update admin details
 exports.updateAdmin = async (req, res) => {
     try {
-        
+        const updateFields = {
+            name: req.body.name,
+            userId: req.body.userId,
+            email: req.body.email
+        };
 
         const updatedAdmin = await Admin.findByIdAndUpdate(
             req.admin.id,
