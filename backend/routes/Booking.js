@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
 const Car = require('../models/Car');
+const { sendBookingConfirmationEmail } = require('../utils/mailer');
 
 // Create a new booking
 router.post('/', async (req, res) => {
   try {
     const {
-      car, // This should be the car's ObjectId from frontend
+      car, // ObjectId from frontend
       name,
       email,
       phone,
@@ -20,7 +21,7 @@ router.post('/', async (req, res) => {
 
     console.log('Creating booking for car:', car, 'from', startDate, 'to', endDate);
 
-    // Check for date conflicts on the server side
+    // Check for date conflicts
     const existingBookings = await Booking.find({
       car: car,
       status: 'confirmed',
@@ -33,14 +34,13 @@ router.post('/', async (req, res) => {
     });
 
     if (existingBookings.length > 0) {
-      console.log('Date conflict found:', existingBookings);
       return res.status(400).json({ 
         message: 'Selected dates conflict with existing bookings. Please choose different dates.' 
       });
     }
 
     // Simulate payment delay
-    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Optionally simulate failure
     if (Math.random() < 0.1) {
@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
     }
     
     const newBooking = new Booking({
-      car: car, // Use the ObjectId
+      car: car,
       name,
       email,
       phone,
@@ -63,6 +63,14 @@ router.post('/', async (req, res) => {
     await newBooking.save();
     console.log('Booking created successfully:', newBooking._id);
 
+    // Fetch car details for email
+    const carDetails = await Car.findById(car);
+
+    // Send confirmation email
+    sendBookingConfirmationEmail(email, name, newBooking, carDetails)
+      .then(() => console.log(`📧 Booking confirmation email sent to ${email}`))
+      .catch(err => console.error("❌ Email sending failed:", err));
+
     res.status(201).json({ message: 'Booking confirmed successfully!' });
   } catch (error) {
     console.error("Error creating booking:", error);
@@ -70,25 +78,21 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET bookings for a specific car (for availability checking)
+// GET bookings for a specific car
 router.get("/car/:carId", async (req, res) => {
   try {
-    const { carId } = req.params; // This is the car registration number
-    
-    // First find the car to get its MongoDB ObjectId
-    const car = await Car.findOne({ carId }); // Find by registration number
+    const { carId } = req.params;
+    const car = await Car.findOne({ carId });
     if (!car) {
       return res.status(404).json({ message: "Car not found" });
     }
-    
-    // Find all confirmed bookings for this car using the MongoDB ObjectId
+
     const bookings = await Booking.find({ 
-      car: car._id, // Use the MongoDB ObjectId
+      car: car._id,
       status: 'confirmed',
-      endDate: { $gte: new Date() } // Only future bookings
+      endDate: { $gte: new Date() }
     }).select('startDate endDate');
-    
-    console.log(`Found ${bookings.length} bookings for car ${carId}`); // Debug log
+
     res.json(bookings);
   } catch (error) {
     console.error("Error fetching car bookings:", error);
@@ -96,7 +100,7 @@ router.get("/car/:carId", async (req, res) => {
   }
 });
 
-// Admin route to get all bookings with car details
+// Admin - get all bookings
 router.get('/', async (req, res) => {
   try {
     const bookings = await Booking.find().populate('car');
@@ -107,8 +111,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-// GET user's bookings (optional)
+// Get bookings by user
 router.get('/user/:userId', async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.params.userId }).populate('car');
@@ -118,7 +121,7 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// GET user's bookings by email
+// Get bookings by email
 router.get('/email/:email', async (req, res) => {
   try {
     const bookings = await Booking.find({ email: req.params.email }).populate('car');
@@ -128,7 +131,8 @@ router.get('/email/:email', async (req, res) => {
     res.status(500).json({ message: 'Error fetching user bookings' });
   }
 });
-// DELETE a booking by ID
+
+// Delete booking
 router.delete('/:id', async (req, res) => {
   try {
     await Booking.findByIdAndDelete(req.params.id);
@@ -138,6 +142,5 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 module.exports = router;
