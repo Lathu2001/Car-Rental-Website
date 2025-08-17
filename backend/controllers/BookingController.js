@@ -18,9 +18,7 @@ const createBooking = async (req, res) => {
     await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds
 
     // Optionally simulate failure
-    if (Math.random() < 0.1) {
-      return res.status(400).json({ message: 'Payment failed. Please try again.' });
-    }
+    
     
 
     const newBooking = new Booking({
