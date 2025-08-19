@@ -48,7 +48,7 @@ const AddCar = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 px-6 py-8">
       <div className="flex justify-center items-center min-h-full">
         <div className="w-full max-w-2xl">
           {/* Header Section */}
@@ -56,8 +56,8 @@ const AddCar = () => {
             <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-[#0C2E8A] to-indigo-600 bg-clip-text mb-2">
               Add New Vehicle
             </h1>
-            <p className="text-gray-600 text-lg">Expand your fleet with a new rental car</p>
-            <div className="w-24 h-1 bg-gradient-to-r from-[#0C2E8A] to-indigo-600 mx-auto mt-4 rounded-full"></div>
+            <p className="text-gray-500 text-lg">Expand your fleet with a new rental car</p>
+            <div className="w-24 h-1 bg-gradient-to-r from-[#0C2E8A] to-indigo-600 mx-auto mt-4 rounded-full shadow-sm"></div>
           </div>
 
           {/* Success Message */}
