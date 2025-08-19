@@ -19,7 +19,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState("");
 
-  const navigate = useNavigate(); // ✅ Use real navigation
+  const navigate = useNavigate(); // ✅ Use navigation
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -83,7 +83,24 @@ export default function Register() {
       });
 
       const data = await response.json();
-      alert(data.message || "Registration successful!");
+      if (response.ok) {
+        alert(data.message || "Registration successful!");
+        // ✅ Option 1: Navigate to homepage
+        navigate("/");
+        // ✅ Option 2 (if you want to just clear fields instead):
+        // setFormData({
+        //   name: "",
+        //   username: "",
+        //   email: "",
+        //   city: "",
+        //   address: "",
+        //   phoneNumber: "",
+        //   NICNumber: "",
+        //   password: "",
+        // });
+      } else {
+        alert(data.message || "Registration failed.");
+      }
     } catch (error) {
       alert("Registration failed. Please try again.");
     } finally {
@@ -236,7 +253,7 @@ export default function Register() {
                 <p className="text-gray-200 mb-2">Need admin access?</p>
                 <button
                   type="button"
-                  onClick={() => navigate("/admin-register")} // ✅ real navigation
+                  onClick={() => navigate("/admin-register")}
                   className="text-blue-400 hover:text-blue-300 transition-colors duration-200 underline decoration-blue-400 underline-offset-4 text-lg font-medium"
                 >
                   Register as Admin

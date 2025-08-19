@@ -13,6 +13,7 @@ const AdminRegister = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [focusedField, setFocusedField] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     
     const navigate = {
         push: (path) => console.log(`Navigating to: ${path}`)
@@ -25,6 +26,8 @@ const AdminRegister = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setSuccessMessage('');
+        
         try {
             // Simulate API call
             const response = await fetch('http://localhost:5000/api/admin/register', {
@@ -34,10 +37,31 @@ const AdminRegister = () => {
                 },
                 body: JSON.stringify(formData),
             });
+            
             const data = await response.json();
-            alert(data.message || 'Registration successful!');
+            
+            if (response.ok) {
+                // Show success message
+                setSuccessMessage(data.message || 'Registration successful!');
+                
+                // Clear form data
+                setFormData({
+                    name: '',
+                    userId: '',
+                    email: '',
+                    password: '',
+                    adminCode: '',
+                });
+                
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    setSuccessMessage('');
+                }, 3000);
+            } else {
+                alert(data.message || 'Registration failed');
+            }
         } catch (error) {
-            alert('Registration failed');
+            alert('Registration failed: ' + error.message);
         } finally {
             setIsLoading(false);
         }
@@ -85,6 +109,18 @@ const AdminRegister = () => {
             {/* Registration Panel - Centered */}
             <div className="relative z-10 w-full max-w-md">
                 <div className="relative">
+                    {/* Success Message */}
+                    {successMessage && (
+                        <div className="mb-6 p-4 bg-green-500/90 backdrop-blur-md text-white rounded-xl border border-green-300/30 shadow-lg animate-fade-in">
+                            <div className="flex items-center justify-center">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                {successMessage}
+                            </div>
+                        </div>
+                    )}
+                    
                     {/* Glassmorphism Card */}
                     <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl relative overflow-hidden">
                         {/* Animated Border */}
@@ -104,7 +140,7 @@ const AdminRegister = () => {
                                 <p className="text-gray-200 text-lg">Join the elite admin community</p>
                             </div>
 
-                            <div className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
                                 {/* Name Field */}
                                 <div className="relative group">
                                     <div className={`absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300 ${focusedField === 'name' ? 'opacity-30' : ''}`}></div>
@@ -209,7 +245,7 @@ const AdminRegister = () => {
 
                                 {/* Submit Button */}
                                 <button
-                                    onClick={handleSubmit}
+                                    type="submit"
                                     disabled={isLoading}
                                     className="w-full py-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white font-bold text-lg rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group shadow-lg"
                                 >
@@ -236,7 +272,7 @@ const AdminRegister = () => {
                                         Already have an account? Login here
                                     </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -248,6 +284,13 @@ const AdminRegister = () => {
                 }
                 .animation-delay-4000 {
                     animation-delay: 4s;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in {
+                    animation: fadeIn 0.5s ease-out;
                 }
             `}</style>
         </div>
