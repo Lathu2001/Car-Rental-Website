@@ -5,7 +5,7 @@ import { Search, Users, Filter, Eye } from 'lucide-react';
 function AdminUserList() {
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const [nicFilter, setNicFilter] = useState('');
+    const [searchFilter, setSearchFilter] = useState('');
 
     useEffect(() => {
         axios.get('http://localhost:5000/api/users/all')
@@ -18,10 +18,11 @@ function AdminUserList() {
 
     const handleFilterChange = (e) => {
         const value = e.target.value;
-        setNicFilter(value);
+        setSearchFilter(value);
 
         const filtered = users.filter(user =>
-            user.NICNumber && user.NICNumber.toLowerCase().includes(value.toLowerCase())
+            (user.NICNumber && user.NICNumber.toLowerCase().includes(value.toLowerCase())) ||
+            (user.name && user.name.toLowerCase().includes(value.toLowerCase()))
         );
         setFilteredUsers(filtered);
     };
@@ -91,8 +92,8 @@ function AdminUserList() {
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search by NIC Number..."
-                                value={nicFilter}
+                                placeholder="Search by NIC or Name..."
+                                value={searchFilter}
                                 onChange={handleFilterChange}
                                 className="w-full pl-12 pr-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 placeholder-gray-500"
                             />
