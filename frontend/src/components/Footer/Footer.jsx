@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, Facebook, ArrowRight } from 'lucide-react';
 
 const Footer = () => {
@@ -45,23 +46,25 @@ const Footer = () => {
                 Quick Links
               </h3>
               <div className="space-y-3">
-                <a 
-                  href="/about" 
+                <Link 
+                  to="/about" 
                   className="flex items-center gap-2 text-gray-300 hover:text-cyan-300 transition-all duration-300 group-hover:translate-x-2"
                 >
                   <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   About
-                </a>
-                <a 
-                  href="/cars" 
-                  className="flex items-center gap-2 text-gray-300 hover:text-cyan-300 transition-all duration-300 group-hover:translate-x-2"
-                >
-                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  Car Listing
-                </a>
-              </div>
-            </div>
-          </div>
+                </Link>
+
+                <Link 
+            to="/Car"  
+            className="flex items-center gap-2 text-gray-300 hover:text-cyan-300 transition-all duration-300 group-hover:translate-x-2"
+          >
+            <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            Car Listing
+          </Link>
+        </div>
+      </div>
+    </div>
+
 
           {/* Contact Details Section */}
           <div className="group">
