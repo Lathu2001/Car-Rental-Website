@@ -1,176 +1,61 @@
-/* BookingPage.css - Modern Light Car Booking Interface */
-
-/* CSS Variables for light theme */
+/* Professional Booking Page Styles */
 :root {
-  --primary-color: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-light: #3b82f6;
-  --secondary-color: #7c3aed;
+  --primary-color: #3b82f6;
+  --primary-light: #60a5fa;
+  --secondary-color: #8b5cf6;
   --accent-color: #06b6d4;
   --success-color: #059669;
-  --error-color: #dc2626;
-  --warning-color: #d97706;
-  --text-primary: #1f2937;
-  --text-secondary: #374151;
-  --text-muted: #6b7280;
+  --success-light: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-accent: #f1f5f9;
-  --bg-light: #f9fafb;
-  --border-color: #e5e7eb;
-  --border-light: #f3f4f6;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --border-light: #e2e8f0;
   --border-radius: 12px;
   --border-radius-lg: 16px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --car-blue: #1e40af;
-  --car-silver: #94a3b8;
-  --car-red: #ef4444;
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --transition: all 0.3s ease;
 }
 
-/* Base styles and animations */
-* {
-  box-sizing: border-box;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes drive {
-  0% {
-    transform: translateX(-100px);
-  }
-  100% {
-    transform: translateX(calc(100vw + 100px));
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Main container with car-themed background */
 .booking-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #f8fafc 50%, #f1f5f9 75%, #f0f9ff 100%);
-  position: relative;
-  padding: 2rem 1rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-/* Car-themed background elements */
-.booking-page::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.4'%3E%3Cpath d='M15 30c0-8.284 6.716-15 15-15s15 6.716 15 15-6.716 15-15 15-15-6.716-15-15zm15-12c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-    radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
-  background-size: 60px 60px, 400px 400px, 300px 300px;
-  background-position: 0 0, 0 0, 100% 100%;
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Floating car icons */
-.booking-page::after {
-  content: '🚗';
-  position: fixed;
-  top: 20%;
-  right: -100px;
-  font-size: 2rem;
-  opacity: 0.1;
-  animation: drive 20s linear infinite;
-  z-index: -1;
-}
-
-.booking-container {
+.container {
   max-width: 1200px;
   margin: 0 auto;
-  animation: fadeInUp 0.8s ease-out;
-  position: relative;
-  z-index: 1;
+  padding: 0 20px;
 }
 
-/* Header */
-.booking-header {
+/* Professional Header */
+.header {
   text-align: center;
-  margin-bottom: 3rem;
-  position: relative;
+  margin-bottom: 40px;
+  color: #2c3e50;
 }
 
-.booking-title {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+  color: #1e293b;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
-.booking-title::before {
-  content: '🚙';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 2rem;
-  animation: float 3s ease-in-out infinite;
-}
-
-.booking-subtitle {
-  font-size: 1.2rem;
-  color: var(--text-muted);
+.header p {
+  color: #64748b;
+  font-size: 1.1rem;
   font-weight: 400;
-  margin-top: 1rem;
 }
 
 /* Car Showcase */
-.car-showcase {
+.car-card {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
@@ -184,7 +69,7 @@
   overflow: hidden;
 }
 
-.car-showcase::before {
+.car-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -194,269 +79,204 @@
   background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
 }
 
-.car-image-container {
+.car-image {
   position: relative;
   border-radius: var(--border-radius);
   overflow: hidden;
-  height: 300px;
+  height: 400px;
   background: linear-gradient(135deg, var(--bg-secondary), var(--bg-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.car-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.car-image img {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
   transition: var(--transition);
   border-radius: var(--border-radius);
+  background: white;
+  padding: 1rem;
+  box-shadow: var(--shadow-xl);
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.15));
 }
 
-.car-image:hover {
-  transform: scale(1.05);
+.car-image:hover img {
+  transform: scale(1.02);
 }
 
-.car-overlay {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-}
-
-.car-badge {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
-}
-
-.car-details-panel {
+.car-info {
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  animation: slideInRight 0.8s ease-out 0.2s both;
 }
 
-.car-model {
-  font-size: 2.5rem;
+.car-title {
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
-  position: relative;
+  color: #1e293b;
+  margin-bottom: 2rem;
+  text-align: center;
+  letter-spacing: -0.01em;
 }
 
-.car-specs {
+/* Professional Car Details Grid */
+.car-details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.spec-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.detail-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   padding: 1rem;
-  background: var(--bg-light);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
-  transition: var(--transition);
+  transition: all 0.2s ease;
   position: relative;
-  overflow: hidden;
 }
 
-.spec-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
-  transition: left 0.5s;
+.detail-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.spec-item:hover::before {
-  left: 100%;
-}
-
-.spec-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-color);
-  background: var(--bg-primary);
-}
-
-.spec-icon {
-  font-size: 1.5rem;
-  width: 40px;
-  height: 40px;
+.detail-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  color: white;
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: var(--transition);
+  margin-bottom: 0.5rem;
 }
 
-.spec-item:hover .spec-icon {
-  transform: scale(1.1) rotate(5deg);
+.detail-icon {
+  font-size: 1.1rem;
+  margin-right: 0.5rem;
+  opacity: 0.8;
 }
 
-.spec-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.spec-label {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  font-weight: 500;
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
-.spec-value {
-  font-size: 1.1rem;
+.detail-value {
+  font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
-  margin-top: 0.25rem;
-}
-
-/* Alert Components */
-.user-info-alert, .unavailable-dates-alert, .error-alert {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-.user-info-alert {
-  border-left: 4px solid var(--success-color);
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.05), rgba(16, 185, 129, 0.05));
-}
-
-.unavailable-dates-alert {
-  border-left: 4px solid var(--error-color);
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.05), rgba(239, 68, 68, 0.05));
-}
-
-.error-alert {
-  border-left: 4px solid var(--warning-color);
-  background: linear-gradient(135deg, rgba(217, 119, 6, 0.05), rgba(245, 158, 11, 0.05));
-}
-
-.alert-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.alert-content strong {
-  display: block;
+  color: #1e293b;
   margin-bottom: 0.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
 }
 
-.alert-header {
+.detail-value.long-term {
+  color: #059669;
+}
+
+.detail-subtitle {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Professional Notifications */
+.notification {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  border-left: 4px solid;
+}
+
+.notification.success {
+  background-color: #f0fdf4;
+  color: #166534;
+  border-left-color: #22c55e;
+}
+
+.notification.warning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border-left-color: #f59e0b;
+}
+
+.notification.error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-left-color: #ef4444;
+}
+
+.notification h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.unavailable-dates {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.alert-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.dates-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 .date-range {
-  background: rgba(220, 38, 38, 0.1);
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: var(--error-color);
-  text-align: center;
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.dates-note {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin: 0;
-  font-style: italic;
+.long-term-notice {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: #166534;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-weight: 500;
+  border: 1px solid #bbf7d0;
 }
 
-/* Form Styles */
-.booking-form-container {
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-lg);
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
-  position: relative;
-}
-
-.booking-form-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-}
-
-.booking-form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+/* Professional Form Container */
+.form-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  margin-bottom: 25px;
+  border: 1px solid #e2e8f0;
 }
 
 .form-section {
-  animation: fadeInUp 0.6s ease-out;
+  margin-bottom: 2.5rem;
 }
 
-.section-title {
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.form-section h3 {
   font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #1e293b;
   margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f1f5f9;
   position: relative;
 }
 
-.section-title::after {
+.form-section h3::after {
   content: '';
   position: absolute;
   bottom: -2px;
   left: 0;
-  width: 50px;
+  width: 40px;
   height: 2px;
-  background: var(--primary-color);
+  background: #3b82f6;
 }
 
 .form-grid {
@@ -465,808 +285,570 @@
   gap: 1.5rem;
 }
 
-.date-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
 
-.form-label {
+.form-field label {
   font-weight: 600;
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
 }
 
-.form-input {
-  padding: 1rem 1.25rem;
-  border: 2px solid var(--border-color);
-  border-radius: var(--border-radius);
+.form-field input {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
   font-size: 1rem;
-  font-weight: 500;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: var(--transition);
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.form-field input:focus {
   outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.form-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  transform: translateY(-1px);
-  background: var(--bg-light);
+.form-field input::placeholder {
+  color: #9ca3af;
 }
 
-.form-input.error {
-  border-color: var(--error-color);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-.form-input::placeholder {
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
+/* Date Input Enhancements */
 .date-input {
-  cursor: pointer;
+  position: relative;
 }
 
-/* Driver Checkbox */
-.driver-checkbox {
+.date-helper {
+  display: block;
+  margin-top: 0.5rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Calendar Date Highlighting - Enhanced for better UX */
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: brightness(0.8);
+  transition: filter 0.2s ease;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  filter: brightness(1.2);
+}
+
+/* Visual feedback for date validation */
+.form-field input[type="date"]:invalid {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+}
+
+.form-field input[type="date"]:focus:invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Professional Checkbox Group */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkbox-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(6, 182, 212, 0.05));
-  border: 2px solid var(--border-color);
-  border-radius: var(--border-radius);
+  padding: 1.25rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
   cursor: pointer;
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
+  background: white;
 }
 
-.driver-checkbox::before {
-  content: '🚗';
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  font-size: 1.5rem;
-  opacity: 0.1;
-  transition: var(--transition);
+.checkbox-item:hover {
+  border-color: #3b82f6;
+  background-color: #f8faff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.driver-checkbox:hover::before {
-  opacity: 0.3;
-  transform: scale(1.2);
-}
-
-.driver-checkbox:hover {
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
-}
-
-.checkbox-input {
-  display: none;
-}
-
-.checkbox-custom {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--bg-primary);
-  position: relative;
-  transition: var(--transition);
-  flex-shrink: 0;
-}
-
-.checkbox-input:checked + .checkbox-custom {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  border-color: var(--primary-color);
-  transform: scale(1.1);
-}
-
-.checkbox-input:checked + .checkbox-custom::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-weight: bold;
-  font-size: 14px;
+.checkbox-item input[type="checkbox"] {
+  margin-right: 1rem;
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
 }
 
 .checkbox-content {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
-.checkbox-title {
+.checkbox-content span:first-child {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.checkbox-content .price {
   font-weight: 600;
-  color: var(--text-primary);
-  font-size: 1.1rem;
+  color: #3b82f6;
 }
 
-.checkbox-price {
-  font-weight: 700;
-  color: var(--primary-color);
-  font-size: 0.9rem;
-}
-
-/* Booking Summary */
-.booking-summary {
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-lg);
+/* Professional Summary Card */
+.summary-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
-  animation: fadeInUp 0.6s ease-out 0.3s both;
-  position: relative;
+  margin-bottom: 25px;
+  border: 1px solid #e2e8f0;
 }
 
-.booking-summary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--success-color), var(--accent-color));
-  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-}
-
-.summary-title {
+.summary-card h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1e293b;
   margin-bottom: 1.5rem;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row.discount {
+  color: #059669;
+  font-weight: 600;
+}
+
+.summary-row.total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.summary-row.deposit {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.summary-row.balance {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.summary-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 0.5rem 0;
+}
+
+/* Professional Action Section - Enhanced for Payment Flow */
+.action-section {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.back-button {
+  background: rgba(71, 85, 105, 0.1);
+  color: #475569;
+  border: 2px solid rgba(71, 85, 105, 0.2);
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.summary-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.back-button:hover {
+  background: rgba(71, 85, 105, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(71, 85, 105, 0.2);
 }
 
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  font-size: 1rem;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.summary-item:last-child {
-  border-bottom: none;
-}
-
-.summary-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
-  margin: 0.5rem 0;
-}
-
-.summary-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
-  border-radius: var(--border-radius);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  border: 2px solid var(--primary-color);
-  margin-top: 1rem;
-}
-
-/* Action Section */
-.action-section {
-  display: flex;
-  justify-content: center;
-  animation: fadeInUp 0.6s ease-out 0.4s both;
-}
-
-.confirm-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem 2.5rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+.proceed-btn {
+  background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
   color: white;
   border: none;
-  border-radius: 50px;
+  padding: 1rem 2rem;
+  border-radius: 10px;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-lg);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  min-width: 320px;
+  letter-spacing: 0.01em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
   position: relative;
   overflow: hidden;
 }
 
-.confirm-btn::before {
+.proceed-btn::before {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
   transition: left 0.5s;
 }
 
-.confirm-btn:hover::before {
+.proceed-btn:hover:not(.disabled)::before {
   left: 100%;
 }
 
-.confirm-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.4);
-}
-
-.confirm-btn:active {
-  transform: translateY(-1px);
-}
-
-.confirm-btn.disabled {
-  background: var(--text-muted);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: var(--shadow-sm);
-}
-
-.confirm-btn.disabled:hover {
-  transform: none;
-  box-shadow: var(--shadow-sm);
-}
-
-/* Payment Section */
-.payment-section {
-  background: var(--bg-primary);
-  border-radius: var(--border-radius-lg);
-  padding: 2rem;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
-  animation: fadeInUp 0.6s ease-out;
-  position: relative;
-}
-
-.payment-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--success-color), #10b981);
-  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-}
-
-.payment-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 2rem;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.payment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.card-element-container {
-  padding: 1.25rem;
-  border: 2px solid var(--border-color);
-  border-radius: var(--border-radius);
-  background: var(--bg-primary);
-  transition: var(--transition);
-}
-
-.card-element-container:focus-within {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.payment-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 1.25rem 2rem;
-  background: linear-gradient(135deg, var(--success-color), #10b981);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-lg);
-}
-
-.payment-btn:hover {
+.proceed-btn:hover:not(.disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px -5px rgba(5, 150, 105, 0.4);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+}
+
+.proceed-btn.disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+.proceed-btn .amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+.payment-info {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.payment-info p {
+  margin: 0.5rem 0;
+  color: #166534;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.payment-info p:first-child {
+  margin-top: 0;
+}
+
+.payment-info p:last-child {
+  margin-bottom: 0;
 }
 
 /* Loading States */
-.loading-container, .error-container {
+.loading-container {
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%);
+  align-items: center;
+  min-height: 60vh;
 }
 
-.loading-spinner, .error-content {
+.loading-content {
   text-align: center;
-  color: var(--text-primary);
-  background: var(--bg-primary);
-  padding: 3rem;
-  border-radius: var(--border-radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-xl);
+  color: #64748b;
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid var(--border-color);
-  border-top: 4px solid var(--primary-color);
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1.5rem;
 }
 
-.loading-spinner p, .error-content p {
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  color: var(--text-secondary);
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.error-content h2 {
+.error-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #64748b;
+}
+
+.error-container h2 {
+  color: #1e293b;
   margin-bottom: 0.5rem;
-  font-size: 2rem;
-  color: var(--text-primary);
+  font-weight: 600;
 }
 
-/* Car decoration elements */
-.car-decoration {
-  position: fixed;
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.car-decoration-1 {
-  top: 10%;
-  left: 10%;
-  font-size: 4rem;
-  animation: float 4s ease-in-out infinite;
-}
-
-.car-decoration-2 {
-  top: 60%;
-  right: 10%;
-  font-size: 3rem;
-  animation: float 5s ease-in-out infinite reverse;
-}
-
-.car-decoration-3 {
-  bottom: 20%;
-  left: 20%;
-  font-size: 3.5rem;
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Responsive Design */
+/* Professional Responsive Design */
 @media (max-width: 1024px) {
-  .car-showcase {
-    grid-template-columns: 1fr;
-    text-align: center;
+  .car-card {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
   }
   
-  .car-specs {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-    margin: 0 auto;
+  .car-image {
+    height: 350px;
   }
 }
 
 @media (max-width: 768px) {
-  .booking-page {
-    padding: 1rem 0.5rem;
+  .container {
+    padding: 0 15px;
   }
   
-  .booking-title {
+  .header h1 {
     font-size: 2rem;
   }
   
-  .car-showcase, .booking-form-container, .booking-summary, .payment-section {
-    padding: 1.5rem;
+  /* Mobile car card - stack vertically */
+  .car-card {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .car-image {
+    height: 250px;
+  }
+  
+  .car-info {
+    padding: 2rem 1.5rem;
+  }
+  
+  .car-title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .car-details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
   
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
-  .date-grid {
-    grid-template-columns: 1fr;
+  .form-container {
+    padding: 1.5rem;
   }
   
-  .dates-grid {
-    grid-template-columns: 1fr;
+  .summary-card {
+    padding: 1.5rem;
   }
   
-  .confirm-btn {
+  /* Mobile responsiveness for buttons */
+  .button-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .proceed-btn {
+    min-width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .back-button {
     width: 100%;
     justify-content: center;
   }
   
-  .car-decoration {
-    display: none;
+  .payment-info {
+    margin: 1rem;
+    padding: 1rem;
+  }
+  
+  .checkbox-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .checkbox-content {
+    width: 100%;
+    margin-left: 2rem;
   }
 }
 
 @media (max-width: 480px) {
-  .booking-title {
+  .booking-page {
+    padding: 10px 0;
+  }
+  
+  .container {
+    padding: 0 10px;
+  }
+  
+  .header h1 {
     font-size: 1.75rem;
   }
   
-  .booking-subtitle {
+  .header p {
     font-size: 1rem;
   }
   
-  .car-model {
-    font-size: 2rem;
+  .car-card {
+    border-radius: 12px;
   }
   
-  .car-showcase, .booking-form-container, .booking-summary, .payment-section {
-    padding: 1rem;
+  .car-image {
+    height: 200px;
   }
   
-  .spec-item {
+  .car-info {
+    padding: 1.5rem 1rem;
+  }
+  
+  .car-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .detail-card {
     padding: 0.75rem;
   }
   
-  .form-input {
-    padding: 0.875rem 1rem;
+  .detail-value {
+    font-size: 0.9rem;
   }
   
-  .driver-checkbox {
-    padding: 1rem;
-  }
-}
-
-/* Additional car-themed enhancements */
-.road-line {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--car-silver) 0px,
-    var(--car-silver) 20px,
-    transparent 20px,
-    transparent 40px
-  );
-  opacity: 0.3;
-  z-index: -1;
-}
-
-/* Tire track pattern */
-.tire-tracks {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 2px 2px, rgba(0,0,0,0.02) 1px, transparent 0);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Speedometer-inspired design elements */
-.speedometer-accent {
-  position: relative;
-}
-
-.speedometer-accent::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -10px;
-  width: 20px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary-color), transparent);
-  transform: translateY(-50%);
-}
-
-/* Traffic light colors for status indicators */
-.status-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 0.5rem;
-}
-
-.status-indicator.green {
-  background: var(--success-color);
-  box-shadow: 0 0 10px rgba(5, 150, 105, 0.3);
-}
-
-.status-indicator.yellow {
-  background: var(--warning-color);
-  box-shadow: 0 0 10px rgba(217, 119, 6, 0.3);
-}
-
-.status-indicator.red {
-  background: var(--error-color);
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
-}
-
-/* Fuel gauge inspired progress bars */
-.fuel-gauge {
-  width: 100%;
-  height: 8px;
-  background: var(--bg-accent);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.fuel-gauge::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    var(--error-color) 0%, 
-    var(--warning-color) 50%, 
-    var(--success-color) 100%);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.fuel-gauge.low::before {
-  width: 25%;
-}
-
-.fuel-gauge.medium::before {
-  width: 60%;
-}
-
-.fuel-gauge.high::before {
-  width: 90%;
-}
-
-/* Dashboard-style cards */
-.dashboard-card {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition);
-}
-
-.dashboard-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-}
-
-.dashboard-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-/* Headlight effect */
-.headlight-glow {
-  position: relative;
-}
-
-.headlight-glow::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -20px;
-  width: 40px;
-  height: 40px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-/* Car parking grid pattern */
-.parking-grid {
-  background-image: 
-    linear-gradient(var(--border-light) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
-  background-size: 50px 50px;
-  background-position: -1px -1px;
-}
-
-/* Rearview mirror effect */
-.mirror-effect {
-  position: relative;
-  overflow: hidden;
-}
-
-.mirror-effect::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-  pointer-events: none;
-}
-
-/* License plate style */
-.license-plate {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border: 2px solid var(--text-primary);
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  text-align: center;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Gear shift indicator */
-.gear-indicator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: var(--text-primary);
-  color: white;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 0.875rem;
-  margin-right: 0.5rem;
-}
-
-/* Turn signal animation */
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.3; }
-}
-
-.turn-signal {
-  animation: blink 1s infinite;
-}
-
-.turn-signal.left {
-  color: var(--warning-color);
-}
-
-.turn-signal.right {
-  color: var(--warning-color);
-}
-
-/* Highway stripes */
-.highway-stripes {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 20px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--border-color) 0px,
-    var(--border-color) 2px,
-    transparent 2px,
-    transparent 20px
-  );
-  opacity: 0.1;
-  z-index: -1;
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .form-section h3 {
+    font-size: 1.1rem;
   }
   
-  .booking-page::after {
-    display: none;
+  .summary-card h3 {
+    font-size: 1.25rem;
   }
   
-  .car-decoration {
-    display: none;
+  .summary-row {
+    font-size: 0.9rem;
+  }
+  
+  .summary-row.total {
+    font-size: 1.1rem;
+  }
+  
+  .proceed-btn .amount {
+    font-size: 1.1rem;
+  }
+  
+  .button-group {
+    gap: 0.75rem;
+  }
+  
+  .back-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
   }
 }
 
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  :root {
-    --primary-color: #0066cc;
-    --text-primary: #000000;
-    --bg-primary: #ffffff;
-    --border-color: #333333;
-  }
-  
-  .form-input:focus {
-    outline: 3px solid var(--primary-color);
-  }
-  
-  .confirm-btn {
-    border: 2px solid var(--text-primary);
-  }
+/* Professional Focus and Accessibility */
+button:focus,
+input:focus,
+.checkbox-item:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
-/* Print styles */
+.checkbox-item input[type="checkbox"]:focus {
+  outline: none;
+}
+
+/* Enhanced accessibility for payment flow */
+.proceed-btn:focus {
+  outline: 3px solid rgba(5, 150, 105, 0.5);
+  outline-offset: 2px;
+}
+
+.back-button:focus {
+  outline: 2px solid rgba(71, 85, 105, 0.5);
+  outline-offset: 2px;
+}
+
+/* Professional Print Styles */
 @media print {
+  .action-section,
+  .notification {
+    display: none;
+  }
+  
   .booking-page {
-    background: white !important;
-    color: black !important;
+    background: white;
   }
   
-  .booking-page::before,
-  .booking-page::after,
-  .car-decoration,
-  .road-line,
-  .tire-tracks,
-  .highway-stripes {
-    display: none !important;
+  .car-card,
+  .form-container,
+  .summary-card {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
   }
   
-  .car-showcase,
-  .booking-form-container,
-  .booking-summary,
-  .payment-section {
-    box-shadow: none !important;
-    border: 1px solid #ccc !important;
+  .header h1 {
+    color: #1e293b;
   }
 }

@@ -25,7 +25,7 @@ import EditUserAccount from "./pages/EditUserAccount.jsx";
 import MyBookings from "./pages/MyBooking.jsx";
 import AdminBookings from "./pages/AdminBooking.jsx";
 import EditAdminDetail from "./pages/EditeAdminDetail.jsx";
-
+import PaymentPage from "./pages/PaymentPage.jsx";
 
 
 function AppLayout() {
@@ -37,9 +37,10 @@ function AppLayout() {
     location.pathname.startsWith("/user-home") ||
     location.pathname.startsWith("/book-car/")||
     location.pathname.startsWith("/booking")||
-    location.pathname.startsWith("/success")||
+    location.pathname.startsWith("/booking-success")||
     location.pathname.startsWith("/edit-user-account")||
     location.pathname.startsWith("/my-booking")||
+    location.pathname.startsWith("/payment")||
     location.pathname.startsWith("/profile");
 
   const isAdminPage =
@@ -86,9 +87,10 @@ function AppLayout() {
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/book-car/:carId" element={<BookingPage />} />
         <Route path="/profile" element={<LoginUser />} />
-        <Route path="/success" element={<Success />} />  
+        <Route path="/booking-success" element={<Success />} />  
         <Route path="/edit-user-account" element={<EditUserAccount/>} />    
-        <Route path="/my-booking" element={<MyBookings/>} /> 
+        <Route path="/my-booking" element={<MyBookings/>} />
+        <Route path="/payment" element={<PaymentPage />} />
 
       </Routes>
 

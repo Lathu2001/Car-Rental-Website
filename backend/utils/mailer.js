@@ -39,11 +39,38 @@ async function sendUserConfirmationEmail(email, name) {
     to: email,
     subject: 'Welcome to Car Rental Service',
     html: `
-      <h2>Welcome, ${name}!</h2>
-      <p>Your account has been successfully created.</p>
-      <p><b>Email:</b> ${email}</p>
-      <p><b>Registration Date:</b> ${new Date().toLocaleDateString()}</p>
-      <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login">Login Here</a>
+      <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; background-color: #ffffff;">
+        
+        <!-- Header -->
+        <div style="background-color: #2c5aa0; color: white; padding: 25px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px; font-weight: normal;">ISGA ENTERPRISE</h1>
+          <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Car Rental Service</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 30px; background-color: #ffffff;">
+          <h2 style="color: #333333; margin: 0 0 15px 0; font-size: 20px;">Welcome, ${name}!</h2>
+          <p style="color: #666666; line-height: 1.5; margin-bottom: 20px;">Your account has been successfully created with ISGA Enterprise.</p>
+          
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <p style="margin: 5px 0; color: #333333;"><strong>Email:</strong> ${email}</p>
+            <p style="margin: 5px 0; color: #333333;"><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
+          </div>
+          
+          <div style="text-align: center; margin: 25px 0;">
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" 
+               style="display: inline-block; background-color: #2c5aa0; color: white; padding: 12px 25px; 
+                      text-decoration: none; border-radius: 5px; font-weight: 500;">
+              Login to Your Account
+            </a>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; color: #666666; font-size: 12px;">
+          <p style="margin: 0;">This is an automated message from ISGA Enterprise.</p>
+        </div>
+      </div>
     `
   };
 
@@ -59,79 +86,97 @@ async function sendBookingConfirmationEmail(email, name, booking, car) {
   const mailOptions = {
     from: `"ISGA ENTERPRISE" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: 'Booking Confirmation - Car Rental Service',
+    subject: 'Booking Confirmation - ISGA Enterprise',
     html: `
-      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px;">
+      <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; background-color: #ffffff;">
+        
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 300;">ISGA ENTERPRISE</h1>
-          <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 16px;">Car Rental Service</p>
+        <div style="background-color: #2c5aa0; color: white; padding: 25px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px; font-weight: normal;">ISGA ENTERPRISE</h1>
+          <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Car Rental Service</p>
         </div>
         
-        <!-- Main Content -->
-        <div style="background: white; padding: 40px 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-          <!-- Success Badge -->
-          <div style="text-align: center; margin-bottom: 30px;">
-            <div style="display: inline-block; background: #d4edda; color: #155724; padding: 12px 24px; border-radius: 25px; font-weight: 500; font-size: 14px; border: 1px solid #c3e6cb;">
-              ✓ Booking Confirmed Successfully
-            </div>
-          </div>
+        <!-- Success Message -->
+        <div style="background-color: #d4edda; color: #155724; padding: 15px; text-align: center; border-bottom: 1px solid #c3e6cb;">
+          <p style="margin: 0; font-weight: 500;">✓ Booking Confirmed Successfully</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 30px; background-color: #ffffff;">
+          <h2 style="color: #333333; margin: 0 0 15px 0; font-size: 20px;">Dear ${name},</h2>
+          <p style="color: #666666; line-height: 1.5; margin-bottom: 25px;">
+            Your car rental booking has been confirmed. Please find the essential details below:
+          </p>
           
-          <h2 style="color: #333; margin: 0 0 20px 0; font-size: 24px; font-weight: 400;">Dear ${name},</h2>
-          <p style="color: #666; line-height: 1.6; font-size: 16px; margin-bottom: 30px;">We're pleased to confirm your car rental booking. Here are your reservation details:</p>
-          
-          <!-- Booking Details Card -->
-          <div style="background: #f8f9fb; border: 1px solid #e9ecef; border-radius: 8px; padding: 25px; margin: 25px 0;">
-            <h3 style="color: #495057; margin: 0 0 20px 0; font-size: 18px; font-weight: 500; border-bottom: 2px solid #dee2e6; padding-bottom: 10px;">Booking Details</h3>
+          <!-- Booking Details -->
+          <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+            <h3 style="color: #2c5aa0; margin: 0 0 15px 0; font-size: 16px; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+              Booking Details
+            </h3>
             
-            <div style="display: grid; gap: 15px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e9ecef;">
-                <span style="color: #6c757d; font-weight: 500;">Vehicle:</span>
-                <span style="color: #495057; font-weight: 600;">${car.model}</span>
-              </div>
-              
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e9ecef;">
-                <span style="color: #6c757d; font-weight: 500;">Rental Period:</span>
-                <span style="color: #495057; font-weight: 600;">${new Date(booking.startDate).toLocaleDateString()} - ${new Date(booking.endDate).toLocaleDateString()}</span>
-              </div>
-              
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e9ecef;">
-                <span style="color: #6c757d; font-weight: 500;">Total Amount:</span>
-                <span style="color: #28a745; font-weight: 700; font-size: 18px;">Rs. ${booking.totalAmount}</span>
-              </div>
-              
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-                <span style="color: #6c757d; font-weight: 500;">Contact Number:</span>
-                <span style="color: #495057; font-weight: 600;">${booking.phone}</span>
-              </div>
-            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #555555; font-weight: 500;">Booking ID:</td>
+                <td style="padding: 8px 0; color: #333333; font-weight: 600;">${booking._id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555555; font-weight: 500;">Vehicle:</td>
+                <td style="padding: 8px 0; color: #333333; font-weight: 600;">${car.model}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555555; font-weight: 500;">Car Number:</td>
+                <td style="padding: 8px 0; color: #333333; font-weight: 600;">${car.carId}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555555; font-weight: 500;">Customer Phone:</td>
+                <td style="padding: 8px 0; color: #333333; font-weight: 600;">${booking.phone}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555555; font-weight: 500;">Start Date:</td>
+                <td style="padding: 8px 0; color: #333333; font-weight: 600;">${new Date(booking.startDate).toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555555; font-weight: 500;">End Date:</td>
+                <td style="padding: 8px 0; color: #333333; font-weight: 600;">${new Date(booking.endDate).toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #555555; font-weight: 500;">Amount Paid:</td>
+                <td style="padding: 8px 0; color: #28a745; font-weight: 700;">Rs. ${booking.upfrontPayment.toLocaleString()}</td>
+              </tr>
+              <tr style="border-top: 1px solid #dee2e6;">
+                <td style="padding: 12px 0 8px 0; color: #555555; font-weight: 500;">Balance at Pickup:</td>
+                <td style="padding: 12px 0 8px 0; color: #dc3545; font-weight: 700; font-size: 16px;">Rs. ${(booking.totalAmount - booking.upfrontPayment).toLocaleString()}</td>
+              </tr>
+            </table>
           </div>
           
-          <!-- What's Next Section -->
-          <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
-            <h4 style="color: #1565c0; margin: 0 0 10px 0; font-size: 16px;">What's Next?</h4>
-            <p style="color: #1976d2; margin: 0; line-height: 1.5; font-size: 14px;">
-              Please arrive 15 minutes early for pickup. Bring a valid driver's license and any required documentation.
-            </p>
+          <!-- Important Notes -->
+          <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+            <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">Important Information</h3>
+            <ul style="color: #856404; margin: 0; padding-left: 20px; line-height: 1.6;">
+              <li>Please arrive 15 minutes early for vehicle pickup</li>
+              <li>Bring valid driving license and ID proof</li>
+              <li>Balance payment is due at pickup time</li>
+              <li>Vehicle inspection will be done before handover</li>
+            </ul>
           </div>
           
-          <!-- Contact Support -->
-          <div style="text-align: center; margin: 30px 0;">
-            <p style="color: #6c757d; margin: 0 0 15px 0; font-size: 14px;">Need help or have questions?</p>
-            <a href="mailto:${process.env.EMAIL_USER}" style="display: inline-block; background: #667eea; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 14px;">Contact Support</a>
-          </div>
-          
-          <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #dee2e6;">
-            <p style="color: #495057; margin: 0; font-size: 16px; line-height: 1.5;">
-              Thank you for choosing our service.<br>
-              <span style="font-weight: 600; color: #667eea;">ISGA ENTERPRISE</span>
+          <!-- Support -->
+          <div style="text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+            <p style="color: #555555; margin: 0 0 10px 0;">Need assistance?</p>
+            <p style="color: #2c5aa0; font-weight: 600; margin: 0;">
+              📞 Contact us: +94 11 234 5678<br>
+              📧 Email: ${process.env.EMAIL_USER}
             </p>
           </div>
         </div>
         
         <!-- Footer -->
-        <div style="text-align: center; padding: 20px; color: #6c757d; font-size: 12px;">
-          <p style="margin: 0;">This is an automated message. Please do not reply to this email.</p>
+        <div style="background-color: #2c5aa0; color: white; padding: 20px; text-align: center;">
+          <p style="margin: 0; font-size: 14px;">
+            Thank you for choosing ISGA Enterprise<br>
+            <span style="font-size: 12px; opacity: 0.8;">This is an automated confirmation email</span>
+          </p>
         </div>
       </div>
     `
