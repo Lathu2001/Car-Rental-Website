@@ -1,37 +1,86 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinaryConfig");
 const Car = require("../models/Car");
-const Booking = require("../models/Booking"); // Add this import
 
-//  Add a car
-router.post("/add", async (req, res) => {
+// ------------------
+// Multer + Cloudinary Storage
+// ------------------
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "car_rental",
+    allowed_formats: ["jpg", "png", "jpeg"],
+  },
+});
+
+const upload = multer({ storage });
+
+// ------------------
+// Helper: Delete old image
+// ------------------
+const deleteImageFromCloudinary = async (imageUrl) => {
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) return false;
   try {
-    console.log("Received request to add car:", req.body);
-    
-    const { carId, model, rentPerDay, fuelCostPerKm, passengerCount, imageUrl } = req.body;
-    
-    if (!carId || !model || !rentPerDay || !fuelCostPerKm || !passengerCount || !imageUrl) {
+    const parts = imageUrl.split("/");
+    const filename = parts[parts.length - 1].split(".")[0];
+    const publicId = `car_rental/${filename}`;
+    const result = await cloudinary.uploader.destroy(publicId);
+    console.log("Image deletion result:", result);
+    return result.result === "ok";
+  } catch (error) {
+    console.error("Error deleting image from Cloudinary:", error);
+    return false;
+  }
+};
+
+// ------------------
+// Add a new car
+// ------------------
+router.post("/add", upload.single("image"), async (req, res) => {
+  try {
+    const {
+      carId,
+      model,
+      rentPerDay,
+      longPeriodRentPerDay,
+      weddingPurposeExtra,
+      fuelCostPerKm,
+      passengerCount,
+    } = req.body;
+
+    if (!carId || !model || !rentPerDay || !longPeriodRentPerDay || !fuelCostPerKm || !passengerCount || !req.file) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    
-    // Check if the car already exists
+
     const existingCar = await Car.findOne({ carId });
-    if (existingCar) {
-      return res.status(400).json({ message: "Car ID already exists" });
-    }
-    
-    // Create a new car entry
-    const newCar = new Car({ carId, model, rentPerDay, fuelCostPerKm, passengerCount, imageUrl });
+    if (existingCar) return res.status(400).json({ message: "Car ID already exists" });
+
+    const imageUrl = req.file.path;
+    const newCar = new Car({
+      carId,
+      model,
+      rentPerDay,
+      longPeriodRentPerDay,
+      weddingPurposeExtra: weddingPurposeExtra || 0,
+      fuelCostPerKm,
+      passengerCount,
+      imageUrl,
+    });
+
     await newCar.save();
-    
-    res.status(201).json({ message: "Car added successfully!", car: newCar });
+    res.status(201).json({ message: "Car added successfully", data: newCar });
   } catch (error) {
     console.error("Error adding car:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 });
 
-//  GET all cars
+// ------------------
+// Get all cars
+// ------------------
 router.get("/", async (req, res) => {
   try {
     const cars = await Car.find();
@@ -41,87 +90,77 @@ router.get("/", async (req, res) => {
   }
 });
 
-//  GET bookings for a specific car (for availability checking)
-router.get("/:carId/bookings", async (req, res) => {
-  try {
-    const { carId } = req.params;
-    
-    // Find the car first to get its ObjectId
-    const car = await Car.findOne({ carId });
-    if (!car) {
-      return res.status(404).json({ message: "Car not found" });
-    }
-    
-    // Find all confirmed bookings for this car
-    const bookings = await Booking.find({ 
-      car: car._id, // Use the ObjectId from the car document
-      status: 'confirmed',
-      endDate: { $gte: new Date() } // Only future and current bookings
-    }).select('startDate endDate');
-    
-    res.json(bookings);
-  } catch (error) {
-    console.error("Error fetching car bookings:", error);
-    res.status(500).json({ message: "Error fetching car bookings" });
-  }
-});
-
-//  GET a single car
+// ------------------
+// Get single car by carId
+// ------------------
 router.get("/:carId", async (req, res) => {
   try {
-    console.log(`Fetching car with ID: ${req.params.carId}`);
     const car = await Car.findOne({ carId: req.params.carId });
-    
-    if (!car) {
-      console.log('Car not found in database');
-      return res.status(404).json({
-        success: false,
-        message: 'Car not found'
-      });
-    }
-    
-    console.log('Car found:', car);
-    res.json({
-      success: true,
-      data: car
-    });
-    
+    if (!car) return res.status(404).json({ message: "Car not found" });
+    res.json({ success: true, data: car });
   } catch (error) {
-    console.error('Error fetching car:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while fetching car'
-    });
+    console.error("Error fetching car:", error);
+    res.status(500).json({ success: false, message: "Server error while fetching car" });
   }
 });
 
-//  Update Car by ID
-router.put("/:carId", async (req, res) => {
+// ------------------
+// Update car by carId (WITH OLD IMAGE DELETION)
+// ------------------
+router.put("/:carId", upload.single("image"), async (req, res) => {
   try {
-    const { model, rentPerDay, fuelCostPerKm, passengerCount, imageUrl } = req.body;
-    
-    const updatedCar = await Car.findOneAndUpdate(
-      { carId: req.params.carId }, 
-      { model, rentPerDay, fuelCostPerKm, passengerCount, imageUrl }, 
-      { new: true }
-    );
-    
-    if (!updatedCar) return res.status(404).json({ message: "Car not found" });
-    
-    res.json({ message: "Car updated successfully", updatedCar });
+    const {
+      model,
+      rentPerDay,
+      longPeriodRentPerDay,
+      weddingPurposeExtra,
+      fuelCostPerKm,
+      passengerCount,
+    } = req.body;
+
+    const existingCar = await Car.findOne({ carId: req.params.carId });
+    if (!existingCar) return res.status(404).json({ message: "Car not found" });
+
+    const updateData = {
+      model,
+      rentPerDay,
+      longPeriodRentPerDay,
+      weddingPurposeExtra,
+      fuelCostPerKm,
+      passengerCount,
+    };
+
+    // Remove undefined fields
+    Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
+    // If a new image is uploaded, delete old image
+    if (req.file) {
+      if (existingCar.imageUrl) await deleteImageFromCloudinary(existingCar.imageUrl);
+      updateData.imageUrl = req.file.path;
+    }
+
+    const updatedCar = await Car.findOneAndUpdate({ carId: req.params.carId }, updateData, { new: true });
+    res.json({ message: "Car updated successfully", data: updatedCar });
   } catch (error) {
     console.error("Error updating car:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-//  DELETE car
+// ------------------
+// Delete car by carId (WITH IMAGE DELETION)
+// ------------------
 router.delete("/:carId", async (req, res) => {
   try {
-    const deletedCar = await Car.findOneAndDelete({ carId: req.params.carId });
-    if (!deletedCar) return res.status(404).json({ message: "Car not found" });
+    const carToDelete = await Car.findOne({ carId: req.params.carId });
+    if (!carToDelete) return res.status(404).json({ message: "Car not found" });
+
+    if (carToDelete.imageUrl) await deleteImageFromCloudinary(carToDelete.imageUrl);
+
+    await Car.findOneAndDelete({ carId: req.params.carId });
     res.json({ message: "Car deleted successfully" });
   } catch (error) {
+    console.error("Error deleting car:", error);
     res.status(500).json({ message: "Error deleting car" });
   }
 });
