@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Button } from "../components/ui/button";
+import { Button } from "../components/ui/Button";
 import { FiPlusCircle, FiEdit3, FiTrash2, FiSearch, FiX } from "react-icons/fi";
 import { FaCar, FaUsers, FaGasPump, FaDollarSign } from "react-icons/fa";
 
@@ -13,7 +13,6 @@ const AdminDashboard = () => {
   const [imageErrors, setImageErrors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch all cars
   useEffect(() => {
     const fetchCars = async () => {
       try {
@@ -29,7 +28,6 @@ const AdminDashboard = () => {
     fetchCars();
   }, []);
 
-  // Filter cars based on search term
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setFilteredCars(cars);
@@ -41,30 +39,22 @@ const AdminDashboard = () => {
     }
   }, [searchTerm, cars]);
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // Clear search
-  const clearSearch = () => {
-    setSearchTerm("");
-  };
+  const clearSearch = () => setSearchTerm("");
 
-  // Handle image loading errors
   const handleImageError = (carId) => {
     setImageErrors(prev => ({ ...prev, [carId]: true }));
   };
 
-  // Handle image load success
   const handleImageLoad = (carId) => {
     setImageErrors(prev => ({ ...prev, [carId]: false }));
   };
 
-  // Delete car function
   const deleteCar = async (carId) => {
     if (!window.confirm("Are you sure you want to delete this car?")) return;
-
     try {
       await axios.delete(`http://localhost:5000/api/cars/${carId}`);
       setCars(cars.filter((car) => car.carId !== carId));
@@ -89,7 +79,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-sky-50">
-      {/* Header Section */}
+      {/* Header */}
       <div className="bg-white shadow-lg border-b border-blue-100">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
@@ -115,7 +105,7 @@ const AdminDashboard = () => {
             </Button>
           </div>
 
-          {/* Search Section */}
+          {/* Search */}
           <div className="mt-8 max-w-md mx-auto md:mx-0">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -146,7 +136,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Content Section */}
+      {/* Cars Grid */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {filteredCars.length === 0 ? (
           <div className="text-center py-16 animate-fade-in">
@@ -179,10 +169,9 @@ const AdminDashboard = () => {
                 className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                {/* Image Section */}
+                {/* Image */}
                 <div className="relative overflow-hidden">
                   {imageErrors[car.carId] ? (
-                    // Fallback when image fails to load
                     <div className="w-full h-56 bg-gradient-to-br from-blue-100 to-indigo-100 flex flex-col items-center justify-center">
                       <FaCar size={60} className="text-blue-400 mb-3" />
                       <p className="text-blue-600 text-sm font-medium">{car.model}</p>
@@ -202,7 +191,7 @@ const AdminDashboard = () => {
                     </>
                   )}
                   
-                  {/* Floating Action Buttons */}
+                  {/* Floating Buttons */}
                   <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                     <button
                       onClick={() => navigate(`/edit-car/${car.carId}`)}
@@ -219,13 +208,12 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Content Section */}
+                {/* Card Content */}
                 <div className="p-6">
                   <h2 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-700 transition-colors duration-300">
                     {car.model}
                   </h2>
                   
-                  {/* Registration Number */}
                   {car.registrationNumber && (
                     <div className="mb-4 p-2 bg-blue-50 rounded-lg">
                       <p className="text-sm font-medium text-blue-700">
@@ -233,7 +221,8 @@ const AdminDashboard = () => {
                       </p>
                     </div>
                   )}
-                  
+
+                  {/* Info List */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
                       <div className="flex items-center space-x-3">
@@ -243,6 +232,26 @@ const AdminDashboard = () => {
                         <span className="text-sm font-medium text-gray-600">Daily Rate</span>
                       </div>
                       <span className="font-bold text-blue-700">{car.rentPerDay} LKR</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                          <FaDollarSign size={14} className="text-white" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-600">Long-term Rent/Day</span>
+                      </div>
+                      <span className="font-bold text-blue-700">{car.longPeriodRentPerDay} LKR</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                          <FaDollarSign size={14} className="text-white" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-600">Wedding Extra</span>
+                      </div>
+                      <span className="font-bold text-blue-700">{car.weddingPurposeExtra} LKR</span>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors duration-200">
@@ -266,7 +275,6 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="mt-6 flex gap-3">
                     <Button
                       onClick={() => navigate(`/edit-car/${car.carId}`)}
@@ -285,7 +293,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Hover Glow Effect */}
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             ))}
@@ -293,68 +300,27 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Custom CSS for animations */}
       <style jsx>{`
         @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes fade-in-delay {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes slide-in-right {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(30px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-
         @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out forwards;
-        }
-
-        .animate-fade-in-delay {
-          animation: fade-in-delay 0.8s ease-out 0.3s forwards;
-        }
-
-        .animate-slide-in-right {
-          animation: slide-in-right 0.6s ease-out forwards;
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out forwards;
-          opacity: 0;
-        }
+        .animate-fade-in { animation: fade-in 0.6s ease-out forwards; }
+        .animate-fade-in-delay { animation: fade-in-delay 0.8s ease-out 0.3s forwards; }
+        .animate-slide-in-right { animation: slide-in-right 0.6s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; opacity: 0; }
       `}</style>
     </div>
   );

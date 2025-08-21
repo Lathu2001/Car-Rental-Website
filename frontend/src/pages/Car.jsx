@@ -28,10 +28,6 @@ const Car = () => {
     }
   }, []);
 
-  const handleBookNow = () => {
-    // This will be replaced with Link component
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -52,66 +48,46 @@ const Car = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {cars.map((car, index) => (
             <div
               key={car._id}
               className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              {/* Car Image */}
+              {/* Car Image with Price Overlay */}
               <div className="relative overflow-hidden rounded-t-2xl">
                 <img
-                  src={car.imageUrl || '/default-car.jpg'}
-                  alt={car.model}
-                  className={`w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105`}
+                  src={car.image || car.imageUrl || '/api/placeholder/400/250'}
+                  alt={`${car.make} ${car.model}`}
+                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = '/api/placeholder/400/250';
+                  }}
                 />
+                
+                {/* Price Overlay */}
+                <div className="absolute bottom-4 left-4">
+                  <div className="bg-white rounded-lg px-3 py-2 shadow-lg">
+                    <div className="text-lg font-bold text-gray-800">
+                      LKR {car.rentPerDay.toLocaleString()}/Day
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Car Details - Always Visible */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-indigo-600 transition-colors duration-300">
+              {/* Car Details */}
+              <div className="p-4">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">
                   {car.make} {car.model}
                 </h3>
                 
-                {/* Car Specifications */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-green-600 text-lg">💰</span>
-                      <span className="font-medium text-gray-700 text-sm">Daily Rate</span>
-                    </div>
-                    <span className="text-lg font-bold text-green-600">LKR {car.rentPerDay.toLocaleString()}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-cyan-50 p-3 rounded-lg border border-blue-100">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-blue-600 text-lg">⛽</span>
-                      <span className="font-medium text-gray-700 text-sm">Fuel Economy</span>
-                    </div>
-                    <span className="font-semibold text-blue-600">{car.fuelCostPerKm} Km/l</span>
-                  </div>
-
-                  <div className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border border-purple-100">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-purple-600 text-lg">👥</span>
-                      <span className="font-medium text-gray-700 text-sm">Capacity</span>
-                    </div>
-                    <span className="font-semibold text-purple-600">{car.passengerCount} Passengers</span>
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                                  <Link to={`/login`} className="block">
-                    <button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                      <span className="flex items-center justify-center space-x-2">
-                        <span>Book Now</span>
-                        <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                      </span>
-                    </button>
-                  </Link>
+                {/* Book Now Button */}
+                <Link to={`/login`} className="block">
+                  <button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    BOOK NOW
+                  </button>
+                </Link>
               </div>
             </div>
           ))}
