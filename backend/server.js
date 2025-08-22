@@ -9,6 +9,7 @@ const reviewRoutes =require('./routes/review')
 require('dotenv').config();
 const bookingRoutes = require('./routes/booking');
 const paymentRoutes = require('./routes/payment');
+const adminBookingRoutes = require('./routes/adminBooking');
 
 
 const app = express();
@@ -53,6 +54,7 @@ app.use("/api/users", userRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/admin', adminBookingRoutes);
 
 // ✅ Start the Server
 const PORT = process.env.PORT || 5000;
