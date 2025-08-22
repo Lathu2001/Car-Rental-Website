@@ -26,6 +26,7 @@ import MyBookings from "./pages/MyBooking.jsx";
 import AdminBookings from "./pages/AdminBooking.jsx";
 import EditAdminDetail from "./pages/EditeAdminDetail.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
+import AdminBookingPage from "./pages/AdminBookingPage.jsx";
 
 
 function AppLayout() {
@@ -54,6 +55,7 @@ function AppLayout() {
     location.pathname.startsWith("/account") ||
     location.pathname.startsWith("/All-bookings") ||
     location.pathname.startsWith("/edit-admin-detail") ||
+    location.pathname.startsWith("/Admin-Booking") ||
     location.pathname.startsWith("/user-detail");
 
   return (
@@ -79,6 +81,7 @@ function AppLayout() {
         <Route path="/edit-admin-detail" element={<EditAdminDetail />} />
         <Route path="/user-detail" element={<UserDetail/>} /> 
         <Route path="/All-bookings" element={<AdminBookings/>} />
+        <Route path="/Admin-Booking" element={<AdminBookingPage/>} />
 
 
 

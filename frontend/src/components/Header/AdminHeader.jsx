@@ -347,7 +347,9 @@ function AdminHeader() {
     { path: "/admin-dashboard", label: "Fleet", icon: Car },
     { path: "/user-detail", label: "Users", icon: Users },
     { path: "/User-Rewiews", label: "Reviews", icon: Star },
+     { path: "/Admin-Booking", label: "Add Bookings", icon: Book },
     { path: "/All-bookings", label: "Bookings", icon: Book },
+   
   ];
 
   const isActiveRoute = (path) => currentPath === path;
@@ -532,6 +534,7 @@ function AdminHeader() {
                     { path: "/admin-dashboard", label: "Fleet", icon: Car },
                     { path: "/user-detail", label: "Users", icon: Users },
                     { path: "/User-Rewiews", label: "Reviews", icon: Star },
+                    { path: "/Admin-Booking", label: "Add Bookings", icon: Book },
                     { path: "/All-bookings", label: "Bookings", icon: Book },
                   ]
                 ].map((item) => {
