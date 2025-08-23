@@ -94,7 +94,7 @@ const Car = () => {
             Available Cars
           </h1>
           <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: '400' }}>
-            Select a car to make a booking
+            Select a car to make your booking
           </p>
         </div>
 
@@ -115,13 +115,13 @@ const Car = () => {
             onChange={handleSearchChange}
             style={{
               width: '100%',
-              padding: '16px 24px',
-              fontSize: '16px',
-              border: '2px solid #e2e8f0',
-              borderRadius: '12px',
+              padding: '14px 20px',
+              fontSize: '15px',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: '10px',
               background: 'white',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+              transition: 'all 0.25s ease',
+              boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
               outline: 'none'
             }}
             onFocus={(e) => {
