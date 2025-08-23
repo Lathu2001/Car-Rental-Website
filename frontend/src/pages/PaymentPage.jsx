@@ -1,4 +1,4 @@
-// PaymentPage.js
+// PaymentPage.js - Fixed version
 import React, { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -53,9 +53,12 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
         setPaymentError(result.error.message);
         setIsProcessing(false);
       } else if (result.paymentIntent.status === 'succeeded') {
-        // Payment successful, confirm booking
+        // Payment successful, confirm booking with payment details
         await axios.put(`http://localhost:5000/api/bookings/confirm/${booking._id}`, {
-          paymentIntentId: result.paymentIntent.id
+          paymentIntentId: result.paymentIntent.id,
+          paidAmount: depositAmount, // Add this
+          paymentMethod: 'card', // Add this
+          status: 'confirmed' // Add this
         });
 
         onPaymentSuccess(result.paymentIntent);
@@ -120,17 +123,16 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
   );
 };
 
+// Rest of the PaymentPage component remains the same...
 const PaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentIntent, setPaymentIntent] = useState(null);
 
-  // Get booking details from location state
   const { booking, car, totalAmount, depositAmount } = location.state || {};
 
   useEffect(() => {
-    // Redirect if no booking data
     if (!booking || !car) {
       navigate('/');
       return;
@@ -141,7 +143,6 @@ const PaymentPage = () => {
     setPaymentIntent(intent);
     setPaymentSuccess(true);
     
-    // Auto redirect to success page after 3 seconds
     setTimeout(() => {
       navigate('/booking-success', {
         state: {
@@ -213,16 +214,12 @@ const PaymentPage = () => {
   return (
     <div className="payment-page">
       <div className="container">
-        
-        {/* Header */}
         <div className="payment-header">
           <h1>Complete Your Payment</h1>
           <p>Secure your booking with a deposit payment</p>
         </div>
 
         <div className="payment-content">
-          
-          {/* Booking Summary */}
           <div className="booking-summary-card">
             <h2>Booking Summary</h2>
             
@@ -304,7 +301,6 @@ const PaymentPage = () => {
             </div>
           </div>
 
-          {/* Payment Form */}
           <div className="payment-form-card">
             <Elements stripe={stripePromise}>
               <CheckoutForm 
@@ -326,10 +322,8 @@ const PaymentPage = () => {
               </ul>
             </div>
           </div>
-
         </div>
 
-        {/* Back Button */}
         <div className="navigation-section">
           <button 
             onClick={() => navigate(-1)}
@@ -338,7 +332,6 @@ const PaymentPage = () => {
             ← Back to Booking Details
           </button>
         </div>
-
       </div>
     </div>
   );

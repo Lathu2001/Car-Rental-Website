@@ -50,12 +50,19 @@ const AdminBookingPage = () => {
       const start = new Date(booking.startDate);
       const end = new Date(booking.endDate);
       
+      // Set hours to avoid timezone issues
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      
       // Include all dates from start to end (inclusive)
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        unavailableDates.push(new Date(d));
+      const currentDate = new Date(start);
+      while (currentDate <= end) {
+        unavailableDates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
       }
     });
     
+    console.log('Generated unavailable dates:', unavailableDates.map(d => d.toDateString()));
     return unavailableDates;
   };
 
@@ -63,10 +70,22 @@ const AdminBookingPage = () => {
   const isDateUnavailable = (date) => {
     if (!date) return false;
     
+    // Normalize the input date
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    
     const unavailableDates = getUnavailableDates();
-    return unavailableDates.some(unavailableDate => 
-      unavailableDate.toDateString() === date.toDateString()
-    );
+    const isUnavailable = unavailableDates.some(unavailableDate => {
+      const normalizedUnavailable = new Date(unavailableDate);
+      normalizedUnavailable.setHours(0, 0, 0, 0);
+      return normalizedUnavailable.getTime() === checkDate.getTime();
+    });
+    
+    if (isUnavailable) {
+      console.log('Date is unavailable:', checkDate.toDateString());
+    }
+    
+    return isUnavailable;
   };
 
   // Validate if selected dates conflict with existing bookings
@@ -88,10 +107,11 @@ const AdminBookingPage = () => {
 
   // Custom day class name function for highlighting booked dates
   const getDayClassName = (date) => {
-    if (isDateUnavailable(date)) {
-      return 'react-datepicker__day--booked';
+    const unavailable = isDateUnavailable(date);
+    if (unavailable) {
+      console.log('Marking date as booked:', date.toDateString()); // Debug log
     }
-    return '';
+    return unavailable ? 'react-datepicker__day--booked' : '';
   };
 
   // Filter out booked dates from being selectable
@@ -123,7 +143,8 @@ const AdminBookingPage = () => {
       if (!selectedCar) return;
       
       try {
-        const response = await axios.get(`http://localhost:5000/api/bookings/car/${selectedCar._id}`);
+        const response = await axios.get(`http://localhost:5000/api/bookings/car/${selectedCar.carId}`);
+        console.log('Fetched bookings for car:', selectedCar.carId, response.data); // Debug log
         setBookedDates(response.data);
       } catch (err) {
         console.error("Error fetching bookings:", err);
@@ -284,25 +305,17 @@ const AdminBookingPage = () => {
         status: 'confirmed' // Directly confirm admin bookings
       });
 
-      alert(`Booking created successfully! Booking ID: ${response.data.booking._id}`);
-      
-      // Reset form and go back to car selection
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        altPhone: '',
-        startDate: null,
-        endDate: null,
-        driver: false,
-        weddingPurpose: false,
-        paidAmount: 0,
-        paymentMethod: 'cash',
-        notes: ''
+      // Redirect to admin booking success page
+      navigate('/admin-booking-success', {
+        state: {
+          booking: response.data.booking,
+          car: selectedCar,
+          totalAmount: totalAmount,
+          paidAmount: formData.paidAmount,
+          remainingBalance: remainingBalance,
+          paymentMethod: formData.paymentMethod
+        }
       });
-      setDays(0);
-      setSelectedCar(null);
-      setShowCarSelection(true);
       
     } catch (err) {
       console.error("Error creating booking:", err.response?.data || err.message);
@@ -478,7 +491,6 @@ const AdminBookingPage = () => {
             </div>
           </div>
         </div>
-
         {/* Date Error */}
         {dateError && (
           <div className="notification error">
@@ -660,7 +672,8 @@ const AdminBookingPage = () => {
                   />
                   <small className="date-helper">
                     Total: Rs. {totalAmount.toLocaleString()} | 
-                    Remaining: Rs. {remainingBalance.toLocaleString()}
+                    30% : Rs. {Math.round(totalAmount * 0.3).toLocaleString()} |
+                    Remaining: Rs. {remainingBalance.toLocaleString()} 
                   </small>
                 </div>
               </div>

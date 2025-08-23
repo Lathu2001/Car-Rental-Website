@@ -1,4 +1,4 @@
-// routes/payment.js
+// routes/payment.js - Updated version
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -10,7 +10,7 @@ router.post('/create-payment-intent', async (req, res) => {
     const { amount, bookingId, metadata = {} } = req.body;
 
     // Validate amount
-    if (!amount || amount < 50) { // Minimum 50 cents
+    if (!amount || amount < 50) {
       return res.status(400).json({ message: 'Invalid payment amount' });
     }
 
@@ -21,7 +21,6 @@ router.post('/create-payment-intent', async (req, res) => {
         return res.status(404).json({ message: 'Booking not found' });
       }
 
-      // Check if booking is still pending
       if (booking.status !== 'pending') {
         return res.status(400).json({ message: 'Booking is not in pending state' });
       }
@@ -29,8 +28,8 @@ router.post('/create-payment-intent', async (req, res) => {
 
     // Create payment intent
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount), // Ensure amount is integer
-      currency: 'lkr', // Sri Lankan Rupees
+      amount: Math.round(amount),
+      currency: 'lkr',
       automatic_payment_methods: {
         enabled: true,
       },
@@ -54,7 +53,7 @@ router.post('/create-payment-intent', async (req, res) => {
   }
 });
 
-// ✅ Webhook to handle payment confirmations
+// ✅ Updated Webhook to handle new booking model
 router.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -66,21 +65,23 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntent = event.data.object;
       console.log('Payment succeeded:', paymentIntent.id);
       
-      // Update booking status if bookingId is in metadata
       if (paymentIntent.metadata.bookingId && paymentIntent.metadata.bookingId !== 'unknown') {
         try {
           const booking = await Booking.findById(paymentIntent.metadata.bookingId);
           if (booking && booking.status === 'pending') {
+            // Update booking with payment details
             booking.status = 'confirmed';
             booking.paymentIntentId = paymentIntent.id;
+            booking.paidAmount = paymentIntent.amount / 100; // Convert from cents
+            booking.paymentMethod = 'card';
+            
             await booking.save();
-            console.log(`Booking ${booking._id} confirmed via webhook`);
+            console.log(`Booking ${booking._id} confirmed via webhook with payment amount: ${booking.paidAmount}`);
           }
         } catch (err) {
           console.error('Error updating booking via webhook:', err);
@@ -92,13 +93,14 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
       const failedPayment = event.data.object;
       console.log('Payment failed:', failedPayment.id);
       
-      // Optionally handle failed payments
       if (failedPayment.metadata.bookingId && failedPayment.metadata.bookingId !== 'unknown') {
         try {
           const booking = await Booking.findById(failedPayment.metadata.bookingId);
           if (booking && booking.status === 'pending') {
-            // Optionally set booking to cancelled or keep as pending
             console.log(`Payment failed for booking ${booking._id}`);
+            // Optionally set booking status or add failed payment note
+            booking.notes = (booking.notes || '') + `Payment failed: ${failedPayment.id} at ${new Date().toISOString()}. `;
+            await booking.save();
           }
         } catch (err) {
           console.error('Error handling failed payment:', err);
@@ -131,34 +133,34 @@ router.get('/status/:paymentIntentId', async (req, res) => {
   }
 });
 
-// ✅ Refund payment (for cancellations)
+// ✅ Updated Refund payment
 router.post('/refund/:paymentIntentId', async (req, res) => {
   try {
     const { paymentIntentId } = req.params;
     const { amount, reason = 'requested_by_customer' } = req.body;
 
-    // Retrieve the payment intent to get the charge
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     
     if (paymentIntent.status !== 'succeeded') {
       return res.status(400).json({ message: 'Payment was not successful, cannot refund' });
     }
 
-    // Create refund
     const refund = await stripe.refunds.create({
       payment_intent: paymentIntentId,
-      amount: amount, // If not provided, refunds full amount
+      amount: amount,
       reason: reason
     });
 
-    // Update booking status if needed
+    // Update booking with refund details
     if (paymentIntent.metadata.bookingId && paymentIntent.metadata.bookingId !== 'unknown') {
       try {
         const booking = await Booking.findById(paymentIntent.metadata.bookingId);
         if (booking) {
           booking.status = 'cancelled';
+          booking.paidAmount = Math.max(0, booking.paidAmount - (refund.amount / 100)); // Subtract refund amount
+          booking.notes = (booking.notes || '') + `Refunded: Rs.${refund.amount / 100} on ${new Date().toISOString()}. `;
           await booking.save();
-          console.log(`Booking ${booking._id} cancelled due to refund`);
+          console.log(`Booking ${booking._id} cancelled and refund of Rs.${refund.amount / 100} processed`);
         }
       } catch (err) {
         console.error('Error updating booking after refund:', err);

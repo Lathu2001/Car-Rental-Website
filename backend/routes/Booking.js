@@ -1,4 +1,4 @@
-// routes/bookings.js
+// routes/bookings.js - Simple working version
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // ✅ Save booking with PENDING status
+    // ✅ Save booking with PENDING status using new model fields
     const newBooking = new Booking({
       car,
       name,
@@ -82,8 +82,11 @@ router.post('/', async (req, res) => {
       withDriver,
       weddingPurpose: weddingPurpose || false,
       totalAmount: totalPrice,
-      upfrontPayment,
-      status: 'pending' // ✅ PENDING until payment confirmation
+      paidAmount: 0, // Using new field
+      upfrontPayment, // Keep for compatibility
+      paymentMethod: 'cash', // Default
+      status: 'pending',
+      isAdminBooking: false
     });
 
     await newBooking.save();
@@ -91,7 +94,12 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({
       message: 'Booking created successfully! Please proceed to payment.',
-      booking: newBooking
+      booking: newBooking,
+      paymentDetails: {
+        totalAmount: totalPrice,
+        depositAmount: upfrontPayment,
+        remainingAmount: totalPrice - upfrontPayment
+      }
     });
    
   } catch (error) {
@@ -103,22 +111,34 @@ router.post('/', async (req, res) => {
 // ✅ Confirm booking after successful payment
 router.put('/confirm/:id', async (req, res) => {
   try {
-    const { paymentIntentId } = req.body;
+    const { paymentIntentId, paidAmount, paymentMethod = 'card', status = 'confirmed' } = req.body;
     
     const booking = await Booking.findById(req.params.id).populate('car');
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    // Update booking status to confirmed
-    booking.status = 'confirmed';
+    // Update booking with payment details
+    booking.status = status;
     booking.paymentIntentId = paymentIntentId;
+    booking.paidAmount = paidAmount || booking.paidAmount;
+    booking.paymentMethod = paymentMethod;
+    booking.updatedAt = new Date();
+
     await booking.save();
 
+    console.log(`Booking ${booking._id} confirmed with payment:`, {
+      paymentIntentId,
+      paidAmount: booking.paidAmount,
+      paymentMethod
+    });
+
     // Send confirmation email
-    sendBookingConfirmationEmail(booking.email, booking.name, booking, booking.car)
-      .then(() => console.log(`📧 Booking confirmation email sent to ${booking.email}`))
-      .catch(err => console.error("❌ Email sending failed:", err));
+    if (booking.email) {
+      sendBookingConfirmationEmail(booking.email, booking.name, booking, booking.car)
+        .then(() => console.log(`📧 Booking confirmation email sent to ${booking.email}`))
+        .catch(err => console.error("❌ Email sending failed:", err));
+    }
 
     res.json({
       message: 'Booking confirmed successfully!',
@@ -142,7 +162,7 @@ router.get("/car/:carId", async (req, res) => {
 
     const bookings = await Booking.find({
       car: car._id,
-      status: 'confirmed', // Only confirmed bookings
+      status: 'confirmed',
       endDate: { $gte: new Date() }
     }).select('startDate endDate');
 
@@ -153,24 +173,58 @@ router.get("/car/:carId", async (req, res) => {
   }
 });
 
-// ✅ Admin - get all bookings
+// ✅ Admin - get all bookings (SIMPLIFIED)
 router.get('/', async (req, res) => {
   try {
-    const bookings = await Booking.find().populate('car');
+    console.log('Fetching all bookings...');
+    
+    const bookings = await Booking.find()
+      .populate('car')
+      .sort({ createdAt: -1 })
+      .exec();
+    
+    console.log(`Found ${bookings.length} bookings`);
+    
     res.json(bookings);
   } catch (error) {
     console.error("Error fetching all bookings:", error);
-    res.status(500).json({ message: 'Error fetching bookings' });
+    res.status(500).json({ 
+      message: 'Error fetching bookings',
+      error: error.message 
+    });
+  }
+});
+
+// ✅ Get single booking
+router.get('/:id', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('car');
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.json(booking);
+  } catch (error) {
+    console.error('Error fetching booking:', error);
+    res.status(500).json({ 
+      message: 'Error fetching booking',
+      error: error.message 
+    });
   }
 });
 
 // ✅ Get bookings by email
 router.get('/email/:email', async (req, res) => {
   try {
+    console.log('Fetching bookings for email:', req.params.email);
+    
     const bookings = await Booking.find({ 
       email: req.params.email,
-      status: 'confirmed' // Only show confirmed bookings to users
-    }).populate('car');
+      status: { $in: ['confirmed', 'completed'] }
+    }).populate('car').sort({ createdAt: -1 });
+    
+    console.log(`Found ${bookings.length} bookings for ${req.params.email}`);
+    
     res.json(bookings);
   } catch (error) {
     console.error('Error fetching bookings by email:', error);
@@ -178,11 +232,72 @@ router.get('/email/:email', async (req, res) => {
   }
 });
 
+// ✅ Add payment to existing booking
+router.post('/:id/add-payment', async (req, res) => {
+  try {
+    const { amount, paymentMethod = 'cash' } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: 'Valid payment amount is required' });
+    }
+
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Check if payment would exceed total
+    const newPaidAmount = booking.paidAmount + amount;
+    if (newPaidAmount > booking.totalAmount) {
+      return res.status(400).json({ 
+        message: 'Payment amount would exceed total booking amount',
+        currentPaid: booking.paidAmount,
+        totalAmount: booking.totalAmount,
+        maxAllowed: booking.totalAmount - booking.paidAmount
+      });
+    }
+
+    // Add payment
+    await booking.addPayment(amount, paymentMethod);
+    await booking.populate('car');
+
+    res.json({
+      message: 'Payment added successfully',
+      booking: booking
+    });
+
+  } catch (error) {
+    console.error('Error adding payment:', error);
+    res.status(500).json({ 
+      message: 'Error adding payment',
+      error: error.message 
+    });
+  }
+});
+
 // ✅ Delete booking
 router.delete('/:id', async (req, res) => {
   try {
-    await Booking.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Booking deleted successfully' });
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // If booking has payments, mark as cancelled instead of deleting
+    if (booking.paidAmount > 0) {
+      booking.status = 'cancelled';
+      booking.updatedAt = new Date();
+      await booking.save();
+      
+      res.json({ 
+        message: 'Booking cancelled successfully (payment record preserved)',
+        booking 
+      });
+    } else {
+      // If no payments, safe to delete
+      await Booking.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Booking deleted successfully' });
+    }
   } catch (error) {
     console.error('Error deleting booking:', error);
     res.status(500).json({ message: 'Server error' });

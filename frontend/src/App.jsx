@@ -7,6 +7,8 @@ import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Footer from "./components/Footer/Footer.jsx";
+import AdminFooter from "./components/Footer/AdminFooter.jsx";
+import UserFooter from "./components/Footer/UserFooter.jsx";
 import AdminRegister from "./pages/AdminRegister.jsx";
 import AdminLogin from "./pages/AdminLogin.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx"; 
@@ -27,6 +29,7 @@ import AdminBookings from "./pages/AdminBooking.jsx";
 import EditAdminDetail from "./pages/EditeAdminDetail.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
 import AdminBookingPage from "./pages/AdminBookingPage.jsx";
+import AdminSuccess from"./pages/AdminSuccess.jsx";
 
 
 function AppLayout() {
@@ -56,6 +59,7 @@ function AppLayout() {
     location.pathname.startsWith("/All-bookings") ||
     location.pathname.startsWith("/edit-admin-detail") ||
     location.pathname.startsWith("/Admin-Booking") ||
+    location.pathname.startsWith("/Admin-booking-success") ||
     location.pathname.startsWith("/user-detail");
 
   return (
@@ -82,6 +86,7 @@ function AppLayout() {
         <Route path="/user-detail" element={<UserDetail/>} /> 
         <Route path="/All-bookings" element={<AdminBookings/>} />
         <Route path="/Admin-Booking" element={<AdminBookingPage/>} />
+        <Route path="/Admin-booking-success" element={<AdminSuccess/>} />  
 
 
 
@@ -96,8 +101,7 @@ function AppLayout() {
         <Route path="/payment" element={<PaymentPage />} />
 
       </Routes>
-
-      <Footer />
+     {isUserPage ? <UserFooter/> : isAdminPage ? <AdminFooter/> : <Footer />}
     </>
   );
 }

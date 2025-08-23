@@ -345,12 +345,11 @@ function AdminHeader() {
 
   const navItems = [
     { path: "/admin-dashboard", label: "Fleet", icon: Car },
+    { path: "/Admin-Booking", label: "Add Bookings", icon: Book },
     { path: "/user-detail", label: "Users", icon: Users },
-    { path: "/User-Rewiews", label: "Reviews", icon: Star },
-     { path: "/Admin-Booking", label: "Add Bookings", icon: Book },
     { path: "/All-bookings", label: "Bookings", icon: Book },
-   
-  ];
+    { path: "/User-Rewiews", label: "Reviews", icon: Star },
+   ];
 
   const isActiveRoute = (path) => currentPath === path;
 
@@ -532,10 +531,12 @@ function AdminHeader() {
                 {[
                   ...[
                     { path: "/admin-dashboard", label: "Fleet", icon: Car },
-                    { path: "/user-detail", label: "Users", icon: Users },
-                    { path: "/User-Rewiews", label: "Reviews", icon: Star },
                     { path: "/Admin-Booking", label: "Add Bookings", icon: Book },
+                    { path: "/user-detail", label: "Users", icon: Users },
                     { path: "/All-bookings", label: "Bookings", icon: Book },
+                    { path: "/User-Rewiews", label: "Reviews", icon: Star },
+                    
+                    
                   ]
                 ].map((item) => {
                   const Icon = item.icon;

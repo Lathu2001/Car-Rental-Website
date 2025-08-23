@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, Facebook, ArrowRight } from 'lucide-react';
-import React from 'react';
 
-const Footer = () => {
+const UserFooter = () => {
   return (
     <footer className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
       {/* Animated Background Elements */}
@@ -22,7 +21,6 @@ const Footer = () => {
       </div>
 
       <div className="relative z-10 w-[90%] mx-auto px-6 py-16">
-
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           
@@ -49,7 +47,7 @@ const Footer = () => {
               </h3>
               <div className="space-y-3">
                 <Link 
-                  to="/" 
+                  to="/user-home" 
                   className="flex items-center gap-2 text-gray-300 hover:text-cyan-300 transition-all duration-300 group-hover:translate-x-2"
                 >
                   <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -57,12 +55,19 @@ const Footer = () => {
                 </Link>
 
                 <Link 
-            to="/Car"  
-            className="flex items-center gap-2 text-gray-300 hover:text-cyan-300 transition-all duration-300 group-hover:translate-x-2"
-          >
-            <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            Car Listing
-          </Link>
+                   to="/user-dashboard"  
+                   className="flex items-center gap-2 text-gray-300 hover:text-cyan-300 transition-all duration-300 group-hover:translate-x-2"
+                >
+                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                   Car Listing
+                </Link>
+                <Link 
+                   to="/my-booking"  
+                   className="flex items-center gap-2 text-gray-300 hover:text-cyan-300 transition-all duration-300 group-hover:translate-x-2"
+                >
+                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                   Booking
+                </Link>
         </div>
       </div>
     </div>
@@ -128,7 +133,7 @@ const Footer = () => {
           </div>
         </div>
 
-      {/* Social Media Section */}
+        {/* Social Media Section */}
       <div className="text-center mb-6">
         <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
           Follow Us
@@ -173,4 +178,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default UserFooter;

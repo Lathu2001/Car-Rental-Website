@@ -456,10 +456,10 @@ const Success = () => {
 
         {/* Navigation */}
         <div className="navigation-buttons">
-          <button onClick={() => navigate("/user-home")} className="home-btn">
+          <button onClick={() => navigate("/admin-dashboard")} className="home-btn">
             🏠 Back to Home
           </button>
-          <button onClick={() => navigate("/my-booking")} className="bookings-btn">
+          <button onClick={() => navigate("/Admin-Booking")} className="bookings-btn">
             📋 View My Bookings
           </button>
         </div>
