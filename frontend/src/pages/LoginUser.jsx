@@ -16,7 +16,7 @@ export default function UserDashboard() {
             return;
         }
 
-        axios.get('http://localhost:5000/api/users/me', {
+        axios.get('https://car-rental-website-ur3v.vercel.app/api/users/me', {
             headers: {
                 Authorization: `Bearer ${token}`
             }

@@ -18,7 +18,7 @@ app.use(express.json());
 // ✅ CORS Configuration
 const allowedOrigins = [
     'http://localhost:5173', 
-    'https://your-deployed-frontend.com' 
+    'https://car-rental-website-p4r9.vercel.app' 
 ];
 
 app.use(cors({
