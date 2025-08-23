@@ -10,7 +10,7 @@ const Car = () => {
 
   useEffect(() => {
     // Fetch cars from API
-    fetch("https://car-rental-website-ur3v.vercel.app/api/cars")
+    fetch("http://localhost:5000/api/cars")
       .then((response) => response.json())
       .then((data) => {
         setCars(data.data || data);

@@ -21,7 +21,7 @@ export default function Login() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await axios.post("https://car-rental-website-ur3v.vercel.app/api/auth/login", formData);
+            const response = await axios.post("http://localhost:5000/api/auth/login", formData);
                      
             const { token, user } = response.data;
                       
