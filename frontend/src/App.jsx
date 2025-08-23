@@ -21,7 +21,7 @@ import UserDetail from "./pages/UserDetails.jsx";
 import AdminAccount from "./pages/AdminAccount.jsx";
 import UserHome from "./pages/UserHome.jsx";
 import Car from "./pages/Car.jsx";
-import LoginUser from "./pages/loginuser.jsx";
+import LoginUser from "./pages/LoginUser.jsx";
 import Success from "./pages/Success.jsx";
 import EditUserAccount from "./pages/EditUserAccount.jsx";
 import MyBookings from "./pages/MyBooking.jsx";
