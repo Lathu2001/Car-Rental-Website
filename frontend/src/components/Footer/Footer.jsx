@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, Facebook, ArrowRight } from 'lucide-react';
-import React from 'react';
+
 
 const Footer = () => {
   return (
