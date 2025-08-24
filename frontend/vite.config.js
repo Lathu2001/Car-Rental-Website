@@ -3,5 +3,9 @@ import react from '@vitejs/plugin-react-swc'
 
 export default defineConfig({
   plugins: [react()],
-  base: './',  // Important for deployment
+  // Remove the base: './' line - this is causing the routing issues
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+  }
 })
