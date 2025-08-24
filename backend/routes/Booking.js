@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
-const Car = require('../models/Car');
+const Car = require('../models/car');
 const { sendBookingConfirmationEmail } = require('../utils/mailer');
 
 // ✅ Create a new booking (PENDING status until payment)
