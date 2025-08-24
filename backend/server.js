@@ -7,7 +7,7 @@ const carRoutes = require('./routes/car');
 const userRoutes = require('./routes/userRoutes');  
 const reviewRoutes =require('./routes/review') 
 require('dotenv').config();
-const bookingRoutes = require('./routes/booking');
+const bookingRoutes = require('./routes/Booking');
 const paymentRoutes = require('./routes/payment');
 const adminBookingRoutes = require('./routes/adminBooking');
 
