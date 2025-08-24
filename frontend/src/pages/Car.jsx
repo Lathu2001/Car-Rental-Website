@@ -10,7 +10,7 @@ const Car = () => {
 
   useEffect(() => {
     // Fetch cars from API
-    fetch("http://localhost:5000/api/cars")
+    fetch("car-rental-website-production.up.railway.app/api/cars")
       .then((response) => response.json())
       .then((data) => {
         setCars(data.data || data);
