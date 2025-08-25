@@ -11,7 +11,7 @@ export default function UserDashboard() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
             navigate('/login');
             return;
@@ -26,7 +26,7 @@ export default function UserDashboard() {
         .catch(err => {
             console.error("❌ Error fetching user details:", err);
             setError("Failed to fetch user details. Please log in again.");
-            localStorage.clear();
+            sessionStorage.clear();
             navigate('/login');
         });
     }, [navigate]);
@@ -37,12 +37,12 @@ export default function UserDashboard() {
 
         setIsDeleting(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             await axios.delete(`${API_BASE_URL}/api/users/delete`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            localStorage.clear();
+            sessionStorage.clear();
             alert("Account deleted successfully.");
             navigate('/register');
         } catch (err) {
@@ -58,7 +58,7 @@ export default function UserDashboard() {
     };
 
     const handleLogout = () => {
-        localStorage.clear();
+        sessionStorage.clear();
         navigate('/login');
     };
 

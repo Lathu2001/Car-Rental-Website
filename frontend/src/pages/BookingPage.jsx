@@ -1,4 +1,4 @@
-// BookingPage.js - Simplified Debug Version
+// BookingPage.js - Simplified Debug Version (sessionStorage + scroll-to-top)
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -31,149 +31,137 @@ const BookingPage = () => {
   const [dateError, setDateError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get today's date
+  // --- Ensure page starts at the top when this component mounts ---
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
+
+  // --- Helper: today (midnight) ---
   const getTodayDate = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return today;
   };
 
-  // Get all unavailable dates as array of Date objects
+  // --- Dates utilities ---
   const getUnavailableDates = () => {
     const unavailableDates = [];
-        
-    bookedDates.forEach(booking => {
+    bookedDates.forEach((booking) => {
       const start = new Date(booking.startDate);
       const end = new Date(booking.endDate);
-            
-      // Include all dates from start to end (inclusive)
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         unavailableDates.push(new Date(d));
       }
     });
-        
     return unavailableDates;
   };
 
-  // Check if a specific date is unavailable
   const isDateUnavailable = (date) => {
     if (!date) return false;
-    
     const unavailableDates = getUnavailableDates();
-    return unavailableDates.some(unavailableDate => 
+    return unavailableDates.some((unavailableDate) =>
       unavailableDate.toDateString() === date.toDateString()
     );
   };
 
-  // Validate if selected dates conflict with existing bookings
   const validateDateRange = (startDate, endDate) => {
     if (!startDate || !endDate) return true;
-    
     const selectedStart = new Date(startDate);
     const selectedEnd = new Date(endDate);
-
-    // Check if any date in the selected range is unavailable
     for (let d = new Date(selectedStart); d <= selectedEnd; d.setDate(d.getDate() + 1)) {
-      if (isDateUnavailable(d)) {
-        return false;
-      }
+      if (isDateUnavailable(d)) return false;
     }
-        
     return true;
   };
 
-  // Custom day class name function for highlighting booked dates
-  const getDayClassName = (date) => {
-    if (isDateUnavailable(date)) {
-      return 'react-datepicker__day--booked';
-    }
-    return '';
-  };
+  const getDayClassName = (date) => (isDateUnavailable(date) ? 'react-datepicker__day--booked' : '');
+  const filterDate = (date) => !isDateUnavailable(date);
 
-  // Filter out booked dates from being selectable
-  const filterDate = (date) => {
-    return !isDateUnavailable(date);
-  };
-
+  // --- Fetch data ---
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
+      // Migrate any legacy localStorage token to sessionStorage (one-time)
+      const sessionTok = sessionStorage.getItem('token');
+      const legacyTok = localStorage.getItem('token');
+      if (!sessionTok && legacyTok) {
+        sessionStorage.setItem('token', legacyTok);
+        localStorage.removeItem('token');
+      }
+
+      const token = sessionStorage.getItem('token'); // 🔁 Use sessionStorage only
       let debugMessages = [];
-      
+
       debugMessages.push(`Token exists: ${!!token}`);
-      
+
       if (token) {
         try {
           debugMessages.push('Making API call to /api/users/me...');
-          
           const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
-          
+
           debugMessages.push('API call successful');
           debugMessages.push(`Response status: ${userResponse.status}`);
-          
+
           const userData = userResponse.data;
           debugMessages.push(`Response data: ${JSON.stringify(userData, null, 2)}`);
-          
           setUser(userData);
-          
-          // Simple, direct auto-fill - exactly like your working version
+
           const autoFillData = {
-            name: userData.name || userData.fullName || userData.firstName || userData.username || '',
+            name:
+              userData.name ||
+              userData.fullName ||
+              userData.firstName ||
+              userData.username ||
+              '',
             email: userData.email || userData.emailAddress || '',
-            phone: userData.phone || userData.phoneNumber || userData.mobile || userData.contactNumber || ''
+            phone:
+              userData.phone ||
+              userData.phoneNumber ||
+              userData.mobile ||
+              userData.contactNumber ||
+              '',
           };
-          
+
           debugMessages.push(`Auto-fill data: ${JSON.stringify(autoFillData, null, 2)}`);
-          
-          // Update form data AFTER we have the data
-          setFormData(prev => {
+
+          setFormData((prev) => {
             const newData = { ...prev, ...autoFillData };
             debugMessages.push(`Final form data: ${JSON.stringify(newData, null, 2)}`);
             return newData;
           });
-          
+
           setUserDataLoaded(true);
           debugMessages.push('User data loaded successfully');
-          
         } catch (userErr) {
           debugMessages.push(`Error fetching user data: ${userErr.message}`);
           debugMessages.push(`Error response: ${JSON.stringify(userErr.response?.data || 'No response data')}`);
           debugMessages.push(`Error status: ${userErr.response?.status || 'No status'}`);
         }
       } else {
-        debugMessages.push('No token found in localStorage');
+        debugMessages.push('No token found in sessionStorage');
       }
-      
+
       setDebugInfo(debugMessages.join('\n'));
     };
 
     const fetchCarAndBookings = async () => {
       try {
-        // Fetch car data
         const carResponse = await axios.get(`${API_BASE_URL}/api/cars/${carId}`);
         setCar(carResponse.data.data || carResponse.data);
 
-        // Fetch existing bookings for this car
         const bookingsResponse = await axios.get(`${API_BASE_URL}/api/bookings/car/${carId}`);
         setBookedDates(bookingsResponse.data);
-       
       } catch (err) {
-        console.error("Error fetching car/booking data:", err);
-        alert("Error loading car details or bookings.");
+        console.error('Error fetching car/booking data:', err);
+        alert('Error loading car details or bookings.');
       }
     };
 
     const fetchAllData = async () => {
       setLoading(true);
-      
-      // Fetch user data first
       await fetchUserData();
-      
-      // Then fetch car and bookings
       await fetchCarAndBookings();
-      
       setLoading(false);
     };
 
@@ -184,111 +172,95 @@ const BookingPage = () => {
     if (!start || !end) return 0;
     const s = new Date(start);
     const e = new Date(end);
-        
-    // If same day, count as 1 day
     if (s.getTime() === e.getTime()) return 1;
-        
     const diffTime = Math.abs(e - s);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end dates
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // include both start & end
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleDateChange = (date, field) => {
     setDateError('');
-    
-    // Create new form data with updated date
-    const newFormData = {
-      ...formData,
-      [field]: date
-    };
+    const newFormData = { ...formData, [field]: date };
 
-    // Determine start and end dates
     const startDate = field === 'startDate' ? date : formData.startDate;
     const endDate = field === 'endDate' ? date : formData.endDate;
 
-    // Validate dates
     if (startDate && endDate) {
       if (endDate < startDate) {
-        setDateError("End date cannot be before start date.");
+        setDateError('End date cannot be before start date.');
         return;
       }
-
       if (!validateDateRange(startDate, endDate)) {
-        setDateError("Some dates in your selected range are unavailable. Please choose different dates.");
+        setDateError('Some dates in your selected range are unavailable. Please choose different dates.');
         return;
       }
-
-      // Calculate days
       const d = calculateDays(startDate, endDate);
       setDays(d > 0 ? d : 0);
     } else if (startDate && !endDate) {
       setDays(0);
     }
 
-    // Update form data
     setFormData(newFormData);
   };
 
-  // Test button to manually trigger user data fetch
+  // Manual test button helper
   const testUserFetch = async () => {
-    const token = localStorage.getItem('token');
+    // Also migrate if needed so devs don't get "No token" alerts
+    const sessionTok = sessionStorage.getItem('token');
+    const legacyTok = localStorage.getItem('token');
+    if (!sessionTok && legacyTok) {
+      sessionStorage.setItem('token', legacyTok);
+      localStorage.removeItem('token');
+    }
+
+    const token = sessionStorage.getItem('token');
     if (!token) {
       alert('No token found');
       return;
     }
-    
+
     try {
       const response = await axios.get(`${API_BASE_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
       alert(`User data received: ${JSON.stringify(response.data, null, 2)}`);
     } catch (err) {
       alert(`Error: ${err.message}`);
     }
   };
 
-  // Proper rental logic: 30+ days = long term rate, less than 30 = normal rate
+  // Pricing logic
   const isLongTerm = days >= 30;
   const baseRentPerDay = car ? (isLongTerm ? car.longPeriodRentPerDay : car.rentPerDay) : 0;
-    
   const totalAmount = car
-    ? days * baseRentPerDay +
-       (formData.driver ? 2500 * days : 0) +
-       (formData.weddingPurpose ? car.weddingPurposeExtra : 0)
+    ? days * baseRentPerDay + (formData.driver ? 2500 * days : 0) + (formData.weddingPurpose ? car.weddingPurposeExtra : 0)
     : 0;
-
-  const depositAmount = Math.round(totalAmount * 0.3); // 30% deposit
+  const depositAmount = Math.round(totalAmount * 0.3); // 30%
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.phone || !formData.startDate || !formData.endDate) {
-      alert("Please fill all required fields.");
+      alert('Please fill all required fields.');
       return;
     }
-
-    // Validate dates
     if (new Date(formData.startDate) < getTodayDate()) {
-      alert("Start date cannot be in the past.");
+      alert('Start date cannot be in the past.');
       return;
     }
-
     if (new Date(formData.endDate) < new Date(formData.startDate)) {
-      alert("End date must be on or after start date.");
+      alert('End date must be on or after start date.');
       return;
     }
-
     if (!validateDateRange(formData.startDate, formData.endDate)) {
-      alert("Selected dates conflict with existing bookings. Please choose different dates.");
+      alert('Selected dates conflict with existing bookings. Please choose different dates.');
       return;
     }
 
@@ -309,24 +281,21 @@ const BookingPage = () => {
         upfrontPayment: depositAmount,
       });
 
-      // Navigate to payment page with booking details
       navigate('/payment', {
         state: {
           booking: response.data.booking,
           car: car,
           totalAmount: totalAmount,
-          depositAmount: depositAmount
-        }
+          depositAmount: depositAmount,
+        },
       });
-     
     } catch (err) {
-      console.error("Error creating booking:", err.response?.data || err.message);
-      alert("Booking creation failed. Please try again.");
+      console.error('Error creating booking:', err.response?.data || err.message);
+      alert('Booking creation failed. Please try again.');
       setIsSubmitting(false);
     }
   };
 
-  // Check if form is valid for payment
   const isFormValid = () => {
     return (
       formData.name &&
@@ -363,21 +332,20 @@ const BookingPage = () => {
   return (
     <div className="booking-page">
       <div className="container">
-                
         {/* Header */}
         <div className="header">
           <h1>Vehicle Reservation</h1>
           <p>Complete your booking details</p>
         </div>
 
-       {/* Professional Car Information Card */}
+        {/* Professional Car Information Card */}
         <div className="car-card">
           <div className="car-image">
             <img src={car.imageUrl || car.image} alt={car.model} />
           </div>
           <div className="car-info">
             <h2 className="car-title">{car.model}</h2>
-                        
+
             {/* Professional Car Details Grid */}
             <div className="car-details-grid">
               <div className="detail-card">
@@ -387,7 +355,7 @@ const BookingPage = () => {
                 </div>
                 <div className="detail-value">{car.carId}</div>
               </div>
-                            
+
               <div className="detail-card">
                 <div className="detail-header">
                   <span className="detail-icon">💰</span>
@@ -395,7 +363,7 @@ const BookingPage = () => {
                 </div>
                 <div className="detail-value">Rs. {car.rentPerDay?.toLocaleString()}</div>
               </div>
-                            
+
               <div className="detail-card">
                 <div className="detail-header">
                   <span className="detail-icon">📅</span>
@@ -404,15 +372,15 @@ const BookingPage = () => {
                 <div className="detail-value long-term">Rs. {car.longPeriodRentPerDay?.toLocaleString()}/day</div>
                 <div className="detail-subtitle">30+ days</div>
               </div>
-                            
+
               <div className="detail-card">
                 <div className="detail-header">
                   <span className="detail-icon">⛽</span>
                   <span className="detail-label">Fuel Efficiency</span>
                 </div>
-                <div className="detail-value">{car.fuelCostPerKm|| 'N/A'} Km/l</div>
+                <div className="detail-value">{car.fuelCostPerKm || 'N/A'} Km/l</div>
               </div>
-                            
+
               <div className="detail-card">
                 <div className="detail-header">
                   <span className="detail-icon">👥</span>
@@ -420,7 +388,7 @@ const BookingPage = () => {
                 </div>
                 <div className="detail-value">{car.passengerCount} Passengers</div>
               </div>
-                            
+
               <div className="detail-card">
                 <div className="detail-header">
                   <span className="detail-icon">💒</span>
@@ -430,7 +398,7 @@ const BookingPage = () => {
               </div>
             </div>
           </div>
-        </div>     
+        </div>
 
         {/* Date Error */}
         {dateError && (
@@ -442,7 +410,6 @@ const BookingPage = () => {
         {/* Professional Booking Form */}
         <div className="form-container">
           <form onSubmit={handleBookingSubmit}>
-                        
             {/* Personal Information */}
             <div className="form-section">
               <h3>Personal Information</h3>
@@ -512,9 +479,7 @@ const BookingPage = () => {
                       calendarClassName="custom-datepicker"
                       required
                     />
-                    <div className="calendar-icon">
-                      📅
-                    </div>
+                    <div className="calendar-icon">📅</div>
                   </div>
                   <small className="date-helper">Booked dates are highlighted and cannot be selected</small>
                 </div>
@@ -533,16 +498,16 @@ const BookingPage = () => {
                       calendarClassName="custom-datepicker"
                       required
                     />
-                    <div className="calendar-icon">
-                      📅
-                    </div>
+                    <div className="calendar-icon">📅</div>
                   </div>
                   <small className="date-helper">Select your return date</small>
                 </div>
               </div>
               {isLongTerm && (
                 <div className="long-term-notice">
-                  <strong>Long-term Discount Applied:</strong> You're saving Rs. {((car.rentPerDay - car.longPeriodRentPerDay) * days).toLocaleString()} with our 30+ day rate.
+                  <strong>Long-term Discount Applied:</strong> You're saving Rs. {(
+                    (car.rentPerDay - car.longPeriodRentPerDay) * days
+                  ).toLocaleString()} with our 30+ day rate.
                 </div>
               )}
             </div>
@@ -552,18 +517,13 @@ const BookingPage = () => {
               <h3>Additional Services</h3>
               <div className="checkbox-group">
                 <label className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    name="driver"
-                    checked={formData.driver}
-                    onChange={handleChange}
-                  />
+                  <input type="checkbox" name="driver" checked={formData.driver} onChange={handleChange} />
                   <div className="checkbox-content">
                     <span>Professional Driver Service</span>
                     <span className="price">Rs. 2,500 per day</span>
                   </div>
                 </label>
-                                
+
                 <label className="checkbox-item">
                   <input
                     type="checkbox"
@@ -591,7 +551,9 @@ const BookingPage = () => {
                   {isLongTerm && (
                     <div className="summary-row discount">
                       <span>Long-term Discount</span>
-                      <span>- Rs. {((car.rentPerDay - car.longPeriodRentPerDay) * days).toLocaleString()}</span>
+                      <span>
+                        - Rs. {((car.rentPerDay - car.longPeriodRentPerDay) * days).toLocaleString()}
+                      </span>
                     </div>
                   )}
                   {formData.driver && (
@@ -626,49 +588,41 @@ const BookingPage = () => {
             {/* Action Buttons */}
             <div className="action-section">
               <div className="button-group">
-                <button
-                  type="button"
-                  className="back-button"
-                  onClick={() => navigate('/cars')}
-                >
+                <button type="button" className="back-button" onClick={() => navigate('/cars')}>
                   ← Back to Cars
                 </button>
-                
-                <button
-                  type="submit"
-                  className={`proceed-btn ${!isFormValid() ? 'disabled' : ''}`}
-                  disabled={!isFormValid()}
-                >
-                  {isSubmitting 
-                    ? (
-                      <>
-                        <span className="spinner-small"></span>
-                        Creating Booking...
-                      </>
-                    ) 
-                    : days > 0 
-                      ? (
-                        <>
-                          <span>Proceed to Payment</span>
-                          <span className="amount">Rs. {depositAmount.toLocaleString()}</span>
-                        </>
-                      ) 
-                      : 'Select Dates to Continue'
-                  }
+
+                <button type="submit" className={`proceed-btn ${!isFormValid() ? 'disabled' : ''}`} disabled={!isFormValid()}>
+                  {isSubmitting ? (
+                    <>
+                      <span className="spinner-small"></span>
+                      Creating Booking...
+                    </>
+                  ) : days > 0 ? (
+                    <>
+                      <span>Proceed to Payment</span>
+                      <span className="amount">Rs. {depositAmount.toLocaleString()}</span>
+                    </>
+                  ) : (
+                    'Select Dates to Continue'
+                  )}
                 </button>
               </div>
-              
+
               {days > 0 && (
                 <div className="payment-info">
-                  <p>You will pay <strong>Rs. {depositAmount.toLocaleString()}</strong> now as deposit</p>
-                  <p>Remaining <strong>Rs. {(totalAmount - depositAmount).toLocaleString()}</strong> due at vehicle pickup</p>
+                  <p>
+                    You will pay <strong>Rs. {depositAmount.toLocaleString()}</strong> now as deposit
+                  </p>
+                  <p>
+                    Remaining <strong>Rs. {(totalAmount - depositAmount).toLocaleString()}</strong> due at vehicle
+                    pickup
+                  </p>
                 </div>
-                )}
+              )}
             </div>
-           
           </form>
         </div>
-       
       </div>
     </div>
   );

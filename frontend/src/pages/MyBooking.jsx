@@ -29,7 +29,7 @@ function MyBookings() {
   useEffect(() => {
     const fetchUserAndBookings = async () => {
       try {
-        const token = localStorage.getItem('token');
+         const token = sessionStorage.getItem('token');
         if (!token) {
           console.log("No token found");
           setLoading(false);

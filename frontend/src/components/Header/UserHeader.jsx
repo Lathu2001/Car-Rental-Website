@@ -26,7 +26,7 @@ function UserHeader() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (token) {
           const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -201,7 +201,7 @@ function UserHeader() {
                       <button
                         onClick={() => {
                           if (window.confirm("Are you sure you want to sign out?")) {
-                            localStorage.removeItem("token");
+                            sessionStorage.removeItem("token");
                             window.location.href = "/";
                           }
                         }}

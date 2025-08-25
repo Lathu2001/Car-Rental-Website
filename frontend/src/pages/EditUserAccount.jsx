@@ -26,7 +26,7 @@ export default function EditUserAccount() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) return navigate('/login');
 
         axios.get(`${API_BASE_URL}/api/users/me`, {
@@ -53,7 +53,7 @@ export default function EditUserAccount() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         try {
             // Update profile info
