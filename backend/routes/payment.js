@@ -116,22 +116,7 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
 });
 
 // ✅ Get payment status
-router.get('/status/:paymentIntentId', async (req, res) => {
-  try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(req.params.paymentIntentId);
-    
-    res.json({
-      status: paymentIntent.status,
-      amount: paymentIntent.amount,
-      currency: paymentIntent.currency,
-      created: paymentIntent.created
-    });
 
-  } catch (error) {
-    console.error('Error retrieving payment status:', error);
-    res.status(500).json({ message: 'Error retrieving payment status' });
-  }
-});
 
 // ✅ Updated Refund payment
 router.post('/refund/:paymentIntentId', async (req, res) => {
