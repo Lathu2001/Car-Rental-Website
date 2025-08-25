@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Slider from 'react-slick';
 import { Link } from "react-router-dom";
+import API_BASE_URL from '../config/api';
 import { 
   CarIcon, 
   CalendarIcon, 
@@ -118,7 +119,7 @@ export default function Home() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/review");
+        const response = await axios.get(`${API_BASE_URL}/api/review`);
         setReviews(response.data);
       } catch (error) {
         console.error("Error fetching reviews:", error);
@@ -141,7 +142,7 @@ export default function Home() {
       return;
     }
     try {
-      await axios.post("http://localhost:5000/api/review", {
+      await axios.post(`${API_BASE_URL}/api/review`, {
         userId: user.userId,
         userName: user.userName,
         rating,
@@ -151,7 +152,7 @@ export default function Home() {
       setRating(0);
       setReviewText("");
       // Refresh reviews
-      const response = await axios.get("http://localhost:5000/api/review");
+      const response = await axios.get(`${API_BASE_URL}/api/review`);
       setReviews(response.data);
     } catch (error) {
       console.error("Error submitting review:", error);

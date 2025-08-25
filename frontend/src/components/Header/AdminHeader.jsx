@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_BASE_URL from '../../config/api';
 import {
   MoreVertical,
   User,
@@ -19,7 +20,7 @@ import {
 import logo from '../../assets/Images/logo.png';
 
 /** ---------- Small helpers ---------- */
-const BOOKINGS_API = 'http://localhost:5000/api/bookings';
+const BOOKINGS_API = `${API_BASE_URL}/api/bookings`;
 
 const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
 const endOfMonth   = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
@@ -300,7 +301,7 @@ function AdminHeader() {
       return;
     }
 
-    axios.get('http://localhost:5000/api/admin/me', {
+    axios.get(`${API_BASE_URL}/api/admin/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }

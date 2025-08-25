@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import API_BASE_URL from '../config/api';
 
 const Car = () => {
   const [cars, setCars] = useState([]);
@@ -7,22 +8,36 @@ const Car = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [user, setUser] = useState({ userId: "", userName: "" });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch cars from API
-    fetch("https://car-rental-website-backend.up.railway.app/api/cars")
-      .then((response) => response.json())
-      .then((data) => {
-        setCars(data.data || data);
-        setFilteredCars(data.data || data);
-        setLoading(false);
-      })
-      .catch((err) => {
+    const fetchCars = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${API_BASE_URL}/api/cars`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const carsData = data.data || data || [];
+        
+        setCars(carsData);
+        setFilteredCars(carsData);
+      } catch (err) {
         console.error("Error fetching cars:", err);
+        setError(err.message);
+        setCars([]);
+        setFilteredCars([]);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
 
-    
+    fetchCars();
   }, []);
 
   // Filter cars based on search term
@@ -46,6 +61,14 @@ const Car = () => {
     setSearchTerm("");
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-LK', {
+      style: 'currency',
+      currency: 'LKR',
+      minimumFractionDigits: 0
+    }).format(amount || 0);
+  };
+
   if (loading) {
     return (
       <div style={{ 
@@ -66,6 +89,55 @@ const Car = () => {
             margin: '0 auto 1.5rem'
           }}></div>
           <p>Loading cars...</p>
+          <style>
+            {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
+          </style>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ 
+        minHeight: '60vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        padding: '20px'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          background: 'white',
+          padding: '40px',
+          borderRadius: '16px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          maxWidth: '500px',
+          width: '100%'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+          <h3 style={{ color: '#dc2626', marginBottom: '12px', fontSize: '24px' }}>
+            Failed to Load Cars
+          </h3>
+          <p style={{ color: '#64748b', marginBottom: '20px' }}>
+            {error}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              background: '#667eea',
+              color: 'white',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -79,12 +151,17 @@ const Car = () => {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif'
     }}>
       {/* Container */}
-      <div style={{ maxWidth: '88%', margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ 
+        maxWidth: '1400px', 
+        margin: '0 auto', 
+        padding: '0 20px',
+        width: '100%'
+      }}>
         
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '40px', color: '#2c3e50' }}>
           <h1 style={{
-            fontSize: '2.5rem',
+            fontSize: 'clamp(2rem, 5vw, 2.5rem)',
             fontWeight: '700',
             marginBottom: '8px',
             letterSpacing: '-0.02em',
@@ -93,51 +170,88 @@ const Car = () => {
           }}>
             Available Cars
           </h1>
-          <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: '400' }}>
-            Select a car to make a booking
+          <p style={{ 
+            color: '#64748b', 
+            fontSize: 'clamp(1rem, 2.5vw, 1.1rem)', 
+            fontWeight: '400' 
+          }}>
+            Select a car to make your booking
           </p>
         </div>
 
         {/* Search Section */}
-        <div style={{ marginBottom: '32px' }}>
+        <div style={{ marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>
           <h3 style={{
             color: '#1a365d',
-            fontSize: '24px',
+            fontSize: 'clamp(1.25rem, 3vw, 1.5rem)',
             fontWeight: 'bold',
-            marginBottom: '16px'
+            marginBottom: '16px',
+            textAlign: 'center'
           }}>
             Search & Select Car
           </h3>
-          <input
-            type="text"
-            placeholder="Search by car model or registration number..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            style={{
-              width: '100%',
-              padding: '16px 24px',
-              fontSize: '16px',
-              border: '2px solid #e2e8f0',
-              borderRadius: '12px',
-              background: 'white',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-              outline: 'none'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#667eea';
-              e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#e2e8f0';
-              e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.04)';
-            }}
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Search by car model or registration number..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              style={{
+                width: '100%',
+                padding: '14px 20px',
+                fontSize: '15px',
+                border: '1.5px solid #e2e8f0',
+                borderRadius: '10px',
+                background: 'white',
+                transition: 'all 0.25s ease',
+                boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#667eea';
+                e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#e2e8f0';
+                e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.04)';
+              }}
+            />
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  padding: '4px',
+                  borderRadius: '4px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f1f5f9';
+                  e.target.style.color = '#1e293b';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'none';
+                  e.target.style.color = '#64748b';
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
           {searchTerm && (
             <p style={{
               marginTop: '8px',
               color: '#64748b',
-              fontSize: '14px'
+              fontSize: '14px',
+              textAlign: 'center'
             }}>
               Showing {filteredCars.length} result{filteredCars.length !== 1 ? 's' : ''} 
               {searchTerm && ` for "${searchTerm}"`}
@@ -145,11 +259,11 @@ const Car = () => {
           )}
         </div>
           
-        {/* Cars Grid */}
+        {/* Cars Grid - Responsive */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '2px',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: 'clamp(16px, 3vw, 24px)',
           marginTop: '24px'
         }}>
           {filteredCars.length === 0 ? (
@@ -163,14 +277,20 @@ const Car = () => {
                 {searchTerm ? '🔍' : '🚗'}
               </div>
               <h3 style={{
-                fontSize: '24px',
+                fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
                 fontWeight: 'bold',
                 marginBottom: '8px',
                 color: '#2d3748'
               }}>
                 {searchTerm ? 'No Cars Found' : 'No Cars Available'}
               </h3>
-              <p style={{ fontSize: '16px', color: '#718096', marginBottom: '16px' }}>
+              <p style={{ 
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)', 
+                color: '#718096', 
+                marginBottom: '16px',
+                maxWidth: '400px',
+                margin: '0 auto 16px'
+              }}>
                 {searchTerm 
                   ? `No cars match your search for "${searchTerm}"` 
                   : 'Check back later for new arrivals!'
@@ -197,7 +317,7 @@ const Car = () => {
           ) : (
             filteredCars.map((car) => (
               <div
-                key={car._id}
+                key={car._id || car.carId}
                 style={{
                   background: 'white',
                   borderRadius: '16px',
@@ -206,7 +326,8 @@ const Car = () => {
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                   border: '2px solid transparent',
-                  position: 'relative'
+                  position: 'relative',
+                  minWidth: '280px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
@@ -223,10 +344,11 @@ const Car = () => {
                 <div style={{
                   position: 'relative',
                   overflow: 'hidden',
-                  height: '200px'
+                  height: 'clamp(180px, 25vw, 220px)',
+                  background: '#f8fafc'
                 }}>
                   <img
-                    src={car.imageUrl || car.image || '/api/placeholder/400/250'}
+                    src={car.imageUrl || car.image || 'https://via.placeholder.com/400x250?text=Car+Image'}
                     alt={car.model || 'Car'}
                     style={{
                       width: '100%',
@@ -235,8 +357,9 @@ const Car = () => {
                       transition: 'transform 0.3s ease'
                     }}
                     onError={(e) => {
-                      e.target.src = '/api/placeholder/400/250';
+                      e.target.src = 'https://via.placeholder.com/400x250?text=Car+Image';
                     }}
+                    loading="lazy"
                   />
                   
                   {/* Price Badge */}
@@ -246,20 +369,20 @@ const Car = () => {
                     left: '12px',
                     background: 'rgba(255, 255, 255, 0.95)',
                     backdropFilter: 'blur(10px)',
-                    padding: '8px 16px',
+                    padding: '8px 12px',
                     borderRadius: '12px',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                   }}>
                     <div style={{
-                      fontSize: '18px',
+                      fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)',
                       fontWeight: 'bold',
                       color: '#1a365d',
                       lineHeight: '1'
                     }}>
-                      Rs. {(car.rentPerDay || 0).toLocaleString()}
+                      {formatCurrency(car.rentPerDay)}
                     </div>
                     <div style={{
-                      fontSize: '12px',
+                      fontSize: '11px',
                       color: '#4a5568',
                       marginTop: '2px'
                     }}>
@@ -269,14 +392,17 @@ const Car = () => {
                 </div>
 
                 {/* Car Details */}
-                <div style={{ padding: '20px' }}>
+                <div style={{ padding: 'clamp(16px, 3vw, 20px)' }}>
                   {/* Car Model */}
                   <h3 style={{
-                    fontSize: '20px',
+                    fontSize: 'clamp(1rem, 3vw, 1.25rem)',
                     fontWeight: 'bold',
                     color: '#1a365d',
                     marginBottom: '16px',
-                    lineHeight: '1.2'
+                    lineHeight: '1.2',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
                     {car.model || 'Unknown Model'}
                   </h3>
@@ -285,22 +411,22 @@ const Car = () => {
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',
-                    gap: '12px',
+                    gap: '8px',
                     marginBottom: '20px'
                   }}>
-                    {/* Row 1 */}
+                    {/* Registration */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 12px',
+                      gap: '6px',
+                      padding: '6px 8px',
                       background: '#f7fafc',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
                       transition: 'background-color 0.2s ease'
                     }}>
-                      <span style={{ fontSize: '16px', width: '16px', textAlign: 'center' }}>🏷️</span>
+                      <span style={{ fontSize: '14px', width: '14px', textAlign: 'center' }}>🏷️</span>
                       <span style={{
-                        fontSize: '15px',
+                        fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                         color: '#4a5568',
                         fontWeight: '500',
                         flex: '1',
@@ -312,18 +438,19 @@ const Car = () => {
                       </span>
                     </div>
                     
+                    {/* Seats */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 12px',
+                      gap: '6px',
+                      padding: '6px 8px',
                       background: '#f7fafc',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
                       transition: 'background-color 0.2s ease'
                     }}>
-                      <span style={{ fontSize: '16px', width: '16px', textAlign: 'center' }}>👥</span>
+                      <span style={{ fontSize: '14px', width: '14px', textAlign: 'center' }}>👥</span>
                       <span style={{
-                        fontSize: '15px',
+                        fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                         color: '#4a5568',
                         fontWeight: '500'
                       }}>
@@ -331,19 +458,19 @@ const Car = () => {
                       </span>
                     </div>
                     
-                    {/* Row 2 */}
+                    {/* Fuel Efficiency */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 12px',
+                      gap: '6px',
+                      padding: '6px 8px',
                       background: '#f7fafc',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
                       transition: 'background-color 0.2s ease'
                     }}>
-                      <span style={{ fontSize: '16px', width: '16px', textAlign: 'center' }}>⛽</span>
+                      <span style={{ fontSize: '14px', width: '14px', textAlign: 'center' }}>⛽</span>
                       <span style={{
-                        fontSize: '15px',
+                        fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                         color: '#4a5568',
                         fontWeight: '500'
                       }}>
@@ -351,31 +478,32 @@ const Car = () => {
                       </span>
                     </div>
                     
+                    {/* Long Period Rate */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      padding: '8px 12px',
+                      gap: '6px',
+                      padding: '6px 8px',
                       background: '#f7fafc',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
                       transition: 'background-color 0.2s ease'
                     }}>
-                      <span style={{ fontSize: '16px', width: '16px', textAlign: 'center' }}>📅</span>
+                      <span style={{ fontSize: '14px', width: '14px', textAlign: 'center' }}>📅</span>
                       <span style={{
-                        fontSize: '15px',
+                        fontSize: 'clamp(0.6rem, 1.8vw, 0.75rem)',
                         color: '#4a5568',
                         fontWeight: '500',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}>
-                        Rs. {(car.longPeriodRentPerDay || 0).toLocaleString()}/day (30+)
+                        {formatCurrency(car.longPeriodRentPerDay)}/30+
                       </span>
                     </div>
                   </div>
 
                   {/* Select Button */}
-                  <Link to={`/book-car/${car.carId}`} style={{ textDecoration: 'none' }}>
+                  <Link to={`/booking`} style={{ textDecoration: 'none' }}>
                     <div
                       style={{
                         display: 'flex',
@@ -386,19 +514,21 @@ const Car = () => {
                         color: 'white',
                         borderRadius: '10px',
                         fontWeight: '600',
-                        fontSize: '18px',
+                        fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)',
                         transition: 'all 0.3s ease',
                         cursor: 'pointer'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)';
                         e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.querySelector('.arrow').style.transform = 'translateX(4px)';
+                        const arrow = e.currentTarget.querySelector('.arrow');
+                        if (arrow) arrow.style.transform = 'translateX(4px)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.querySelector('.arrow').style.transform = 'translateX(0)';
+                        const arrow = e.currentTarget.querySelector('.arrow');
+                        if (arrow) arrow.style.transform = 'translateX(0)';
                       }}
                     >
                       <span>Book Now</span>
@@ -419,8 +549,26 @@ const Car = () => {
           )}
         </div>
       </div>
-
-
+      
+      {/* CSS for animations */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 1200px) {
+          /* 3 columns on medium screens */
+        }
+        
+        @media (max-width: 768px) {
+          /* 2 columns on tablets */
+        }
+        
+        @media (max-width: 480px) {
+          /* 1 column on mobile */
+        }
+      `}</style>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, Shield, ArrowRight, Sparkles } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const AdminLogin = () => {
     const [formData, setFormData] = useState({
@@ -26,7 +27,7 @@ const AdminLogin = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await axios.post('car-rental-website-production.up.railway.app/api/admin/login', formData);
+            const response = await axios.post(`${API_BASE_URL}/api/admin/login`, formData);
            
             alert('Login successful');
             // Store token in localStorage or context

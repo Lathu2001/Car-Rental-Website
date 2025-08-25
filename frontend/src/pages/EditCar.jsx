@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Button } from "../components/ui/Button";
+import API_BASE_URL from '../config/api';
 
 const EditCar = () => {
   const { carId } = useParams();
@@ -14,7 +15,7 @@ const EditCar = () => {
   useEffect(() => {
     const fetchCar = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/cars/${carId}`);
+        const response = await axios.get(`${API_BASE_URL}/api/cars/${carId}`);
         setCar(response.data.data);
       } catch {
         alert("Car not found or server error.");
@@ -38,7 +39,7 @@ const EditCar = () => {
     formData.append("image", file);
 
     try {
-      const response = await axios.put(`http://localhost:5000/api/cars/${carId}`, formData, {
+      const response = await axios.put(`${API_BASE_URL}/api/cars/${carId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (response.data.data.imageUrl) {
@@ -54,7 +55,7 @@ const EditCar = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/cars/${carId}`, car);
+      await axios.put(`${API_BASE_URL}/api/cars/${carId}`, car);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);

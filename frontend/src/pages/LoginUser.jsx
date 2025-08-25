@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { User, Edit3, Trash2, Mail, MapPin, Phone, CreditCard, Home, LogOut } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 export default function UserDashboard() {
     const [user, setUser] = useState(null);
@@ -16,7 +17,7 @@ export default function UserDashboard() {
             return;
         }
 
-        axios.get('http://localhost:5000/api/api/users/me', {
+        axios.get(`${API_BASE_URL}/api/api/users/me`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -37,7 +38,7 @@ export default function UserDashboard() {
         setIsDeleting(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.delete('http://localhost:5000/api/users/delete', {
+            await axios.delete(`${API_BASE_URL}/api/users/delete`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

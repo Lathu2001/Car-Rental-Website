@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Shield, Eye, EyeOff } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const AdminRegister = () => {
     const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ const AdminRegister = () => {
         
         try {
             // Simulate API call
-            const response = await fetch('http://localhost:5000/api/admin/register', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

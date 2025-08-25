@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API_BASE_URL from '../config/api';
 
 const UserReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -13,7 +14,7 @@ const UserReviews = () => {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/api/review");
+      const response = await axios.get(`${API_BASE_URL}/api/review`);
       setReviews(response.data);
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
@@ -25,7 +26,7 @@ const UserReviews = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this review?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/review/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/review/${id}`);
         fetchReviews(); // Refresh reviews
       } catch (error) {
         console.error("Failed to delete review:", error);

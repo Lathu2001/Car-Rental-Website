@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 import { 
   Calendar, 
   Car, 
@@ -37,7 +38,7 @@ function AdminBookings() {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/bookings');
+      const res = await axios.get(`${API_BASE_URL}/api/bookings`);
       
       // Filter to show only confirmed bookings
       const confirmedBookings = res.data.filter(booking => booking.status === 'confirmed');
@@ -75,7 +76,7 @@ function AdminBookings() {
 
     try {
       // Update booking status to completed instead of deleting
-      await axios.put(`http://localhost:5000/api/bookings/${id}`, { 
+      await axios.put(`${API_BASE_URL}/api/bookings/${id}`, { 
         status: 'completed' 
       });
       
@@ -85,7 +86,7 @@ function AdminBookings() {
       console.error('Error completing booking:', error);
       // Fallback to delete if update endpoint doesn't exist
       try {
-        await axios.delete(`http://localhost:5000/api/bookings/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/bookings/${id}`);
         setBookings(prev => prev.filter(booking => booking._id !== id));
       } catch (deleteError) {
         console.error('Error deleting booking:', deleteError);

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './BookingPage.css';
+import API_BASE_URL from '../config/api';
 
 const BookingPage = () => {
   const { carId } = useParams();
@@ -105,7 +106,7 @@ const BookingPage = () => {
         try {
           debugMessages.push('Making API call to /api/users/me...');
           
-          const userResponse = await axios.get('http://localhost:5000/api/users/me', {
+          const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           
@@ -151,11 +152,11 @@ const BookingPage = () => {
     const fetchCarAndBookings = async () => {
       try {
         // Fetch car data
-        const carResponse = await axios.get(`http://localhost:5000/api/cars/${carId}`);
+        const carResponse = await axios.get(`${API_BASE_URL}/api/cars/${carId}`);
         setCar(carResponse.data.data || carResponse.data);
 
         // Fetch existing bookings for this car
-        const bookingsResponse = await axios.get(`http://localhost:5000/api/bookings/car/${carId}`);
+        const bookingsResponse = await axios.get(`${API_BASE_URL}/api/bookings/car/${carId}`);
         setBookedDates(bookingsResponse.data);
        
       } catch (err) {
@@ -245,7 +246,7 @@ const BookingPage = () => {
     }
     
     try {
-      const response = await axios.get('http://localhost:5000/api/users/me', {
+      const response = await axios.get(`${API_BASE_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -294,7 +295,7 @@ const BookingPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/bookings', {
+      const response = await axios.post(`${API_BASE_URL}/api/bookings`, {
         car: car._id,
         name: formData.name,
         email: formData.email,

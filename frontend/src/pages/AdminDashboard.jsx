@@ -4,6 +4,7 @@ import axios from "axios";
 import { Button } from "../components/ui/Button";
 import { FiPlusCircle, FiEdit3, FiTrash2, FiSearch, FiX } from "react-icons/fi";
 import { FaCar, FaUsers, FaGasPump, FaDollarSign } from "react-icons/fa";
+import API_BASE_URL from '../config/api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/cars");
+        const response = await axios.get(`${API_BASE_URL}/api/cars`);
         setCars(response.data);
         setFilteredCars(response.data);
         setLoading(false);
@@ -56,7 +57,7 @@ const AdminDashboard = () => {
   const deleteCar = async (carId) => {
     if (!window.confirm("Are you sure you want to delete this car?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/cars/${carId}`);
+      await axios.delete(`${API_BASE_URL}/api/cars/${carId}`);
       setCars(cars.filter((car) => car.carId !== carId));
     } catch (error) {
       console.error("Error deleting car:", error);

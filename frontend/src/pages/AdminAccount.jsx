@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { User, Mail, Settings, Edit3, Save, X, Shield } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 
 const AdminAccount = () => {
     const [admin, setAdmin] = useState(null);
@@ -24,7 +25,7 @@ const AdminAccount = () => {
             return;
         }
 
-        axios.get('http://localhost:5000/api/admin/me', {
+        axios.get(`${API_BASE_URL}/api/admin/me`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -55,7 +56,7 @@ const AdminAccount = () => {
     const handleUpdate = () => {
         setIsLoading(true);
         const token = localStorage.getItem('adminToken');
-        axios.put('http://localhost:5000/api/admin/update', formData, {
+        axios.put(`${API_BASE_URL}/api/admin/update`, formData, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Home, CreditCard, Edit3, Save, X, ArrowLeft, Lock } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 export default function EditUserAccount() {
     const [userData, setUserData] = useState({
@@ -28,7 +29,7 @@ export default function EditUserAccount() {
         const token = localStorage.getItem('token');
         if (!token) return navigate('/login');
 
-        axios.get('http://localhost:5000/api/users/me', {
+        axios.get(`${API_BASE_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
         }).then(res => {
             setUserData(res.data);
@@ -56,7 +57,7 @@ export default function EditUserAccount() {
 
         try {
             // Update profile info
-            await axios.put('http://localhost:5000/api/users/update', userData, {
+            await axios.put(`${API_BASE_URL}/api/users/update`, userData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -68,7 +69,7 @@ export default function EditUserAccount() {
                     return;
                 }
 
-                await axios.put('http://localhost:5000/api/users/change-password', passwordData, {
+                await axios.put(`${API_BASE_URL}/api/users/change-password`, passwordData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 alert("✅ Password updated successfully!");

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./BookingSuccessPage.css";
+import API_BASE_URL from '../config/api';
 
 const Success = () => {
   const location = useLocation();

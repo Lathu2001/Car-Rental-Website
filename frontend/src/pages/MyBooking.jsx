@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import API_BASE_URL from '../config/api';
+
 import { 
   Calendar, 
   Car, 
@@ -35,7 +37,7 @@ function MyBookings() {
         }
 
         // Step 1: Get user data from token
-        const userResponse = await fetch('http://localhost:5000/api/users/me', {
+        const userResponse = await fetch(`${API_BASE_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const userData = await userResponse.json();
@@ -44,7 +46,7 @@ function MyBookings() {
         setUserEmail(email);
 
         // Step 2: Use email to get bookings
-        const bookingResponse = await fetch(`http://localhost:5000/api/bookings/email/${email}`);
+        const bookingResponse = await fetch(`${API_BASE_URL}/api/bookings/email/${email}`);
         const bookingData = await bookingResponse.json();
         
         // Enhanced bookings with additional data

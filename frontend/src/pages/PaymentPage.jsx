@@ -5,6 +5,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './PaymentPage.css';
+import API_BASE_URL from '../config/api';
 
 const stripePromise = loadStripe('pk_test_51RZno6RBKRqXk49LQzEuTW2OkwqAAsWM2qqRjsvElpFa79Ytx0hsqluVBLWIptXiJyXlaU9jJ04Ojb5D8I6GVFZG00al5n1ByR');
 
@@ -27,7 +28,7 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
 
     try {
       // Create payment intent
-      const { data } = await axios.post('http://localhost:5000/api/payment/create-payment-intent', {
+      const { data } = await axios.post(`${API_BASE_URL}/api/payment/create-payment-intent`, {
         amount: depositAmount * 100, // Convert to cents
         bookingId: booking._id,
         metadata: {
@@ -54,7 +55,7 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
         setIsProcessing(false);
       } else if (result.paymentIntent.status === 'succeeded') {
         // Payment successful, confirm booking with payment details
-        await axios.put(`http://localhost:5000/api/bookings/confirm/${booking._id}`, {
+        await axios.put(`${API_BASE_URL}/api/bookings/confirm/${booking._id}`, {
           paymentIntentId: result.paymentIntent.id,
           paidAmount: depositAmount, // Add this
           paymentMethod: 'card', // Add this

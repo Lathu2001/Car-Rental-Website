@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import API_BASE_URL from '../../config/api';
 import {
   MoreVertical,
   User,
@@ -27,7 +28,7 @@ function UserHeader() {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const userResponse = await axios.get('http://localhost:5000/api/users/me', {
+          const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setUser(userResponse.data);

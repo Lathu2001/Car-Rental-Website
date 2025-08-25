@@ -4,7 +4,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import './BookingPage.css'; // Using the existing CSS file
+import './BookingPage.css';
+import API_BASE_URL from '../config/api';
 
 const AdminBookingPage = () => {
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ const AdminBookingPage = () => {
     const fetchCars = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/cars');
+        const response = await axios.get(`${API_BASE_URL}/api/cars`);
         setCars(response.data.data || response.data);
       } catch (err) {
         console.error("Error fetching cars:", err);
@@ -143,7 +144,7 @@ const AdminBookingPage = () => {
       if (!selectedCar) return;
       
       try {
-        const response = await axios.get(`http://localhost:5000/api/bookings/car/${selectedCar.carId}`);
+        const response = await axios.get(`${API_BASE_URL}/api/bookings/car/${selectedCar.carId}`);
         console.log('Fetched bookings for car:', selectedCar.carId, response.data); // Debug log
         setBookedDates(response.data);
       } catch (err) {
@@ -288,7 +289,7 @@ const AdminBookingPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/admin/bookings', {
+      const response = await axios.post(`${API_BASE_URL}/api/admin/bookings`, {
         car: selectedCar._id,
         name: formData.name,
         email: formData.email || '', // Optional

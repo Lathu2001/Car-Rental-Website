@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_BASE_URL from '../config/api';
 
 const AddCar = () => {
   const [car, setCar] = useState({
@@ -40,7 +41,7 @@ const AddCar = () => {
       Object.keys(car).forEach((key) => formData.append(key, car[key]));
       formData.append("image", file);
 
-      await axios.post("http://localhost:5000/api/cars/add", formData, {
+      await axios.post(`${API_BASE_URL}/api/cars/add`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

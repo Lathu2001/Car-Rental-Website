@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Search, Users, Filter, Eye } from 'lucide-react';
+import API_BASE_URL from '../config/api';
+
 
 function AdminUserList() {
     const [users, setUsers] = useState([]);
@@ -8,7 +10,7 @@ function AdminUserList() {
     const [searchFilter, setSearchFilter] = useState('');
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/users/all')
+        axios.get(`${API_BASE_URL}/api/users/all`)
             .then(res => {
                 setUsers(res.data);
                 setFilteredUsers(res.data);

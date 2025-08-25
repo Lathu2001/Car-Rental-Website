@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 
 export default function Login() {
     const [formData, setFormData] = useState({
@@ -9,35 +10,132 @@ export default function Login() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [focusedField, setFocusedField] = useState("");
+    const [notification, setNotification] = useState({ message: "", type: "", show: false });
+    const [errors, setErrors] = useState({});
 
     const navigate = useNavigate();
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        
+        // Clear field-specific error when user starts typing
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: "" });
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        // Email validation
+        if (!formData.identifier) {
+            newErrors.identifier = "Email is required";
+        } else if (!formData.identifier.includes('@')) {
+            newErrors.identifier = "Please enter a valid email address";
+        }
+
+        // Password validation
+        if (!formData.password) {
+            newErrors.password = "Password is required";
+        } else if (formData.password.length < 6) {
+            newErrors.password = "Password must be at least 6 characters";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const showNotification = (message, type = "error") => {
+        setNotification({ message, type, show: true });
+        // Auto-hide notification after 5 seconds
+        setTimeout(() => {
+            setNotification({ message: "", type: "", show: false });
+        }, 5000);
     };
 
     const handleSignIn = async (e) => {
         e.preventDefault();
+        
+        // Validate form before submitting
+        if (!validateForm()) {
+            showNotification("Please fix the errors below", "error");
+            return;
+        }
+
         setIsLoading(true);
+        
         try {
-            const response = await axios.post("https://car-rental-website-backend.up.railway.app/api/auth/login", formData);
+            const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData, {
+                timeout: 10000, // 10 second timeout
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
                      
             const { token, user } = response.data;
+            
+            if (!token || !user) {
+                throw new Error("Invalid response from server");
+            }
                       
-            // Store user ID in localStorage
-            localStorage.setItem("token", token);
-            localStorage.setItem("userId", user.id);
-            localStorage.setItem("username", user.name);
-            localStorage.setItem("userEmail", user.email);
+            // Store user data securely (consider using sessionStorage for better security)
+            sessionStorage.setItem("token", token);
+            sessionStorage.setItem("userId", user.id);
+            sessionStorage.setItem("username", user.name || user.username || "User");
+            sessionStorage.setItem("userEmail", user.email);
                  
-            alert("Welcome to the Vehicle Rental System!");
-            navigate('/user-dashboard');
+            showNotification("Welcome! Login successful. Redirecting...", "success");
+            
+            // Redirect after showing success message
+            setTimeout(() => {
+                navigate('/user-dashboard');
+            }, 1000);
+            
         } catch (error) {
-            alert('Login failed. Please check your email or password.');
+            console.error('Login error:', error);
+            
+            let errorMessage = "Login failed. Please try again.";
+            
+            if (error.code === 'ECONNABORTED') {
+                errorMessage = "Request timeout. Please check your internet connection.";
+            } else if (error.response) {
+                // Server responded with error status
+                const status = error.response.status;
+                const serverMessage = error.response.data?.message;
+                
+                switch (status) {
+                    case 400:
+                        errorMessage = serverMessage || "Invalid email or password";
+                        break;
+                    case 401:
+                        errorMessage = "Invalid credentials. Please check your email and password.";
+                        break;
+                    case 404:
+                        errorMessage = "Account not found. Please check your email or register.";
+                        break;
+                    case 429:
+                        errorMessage = "Too many login attempts. Please try again later.";
+                        break;
+                    case 500:
+                        errorMessage = "Server error. Please try again later.";
+                        break;
+                    default:
+                        errorMessage = serverMessage || `Error ${status}: Please try again.`;
+                }
+            } else if (error.request) {
+                // Request was made but no response received
+                errorMessage = "Unable to connect to server. Please check your internet connection.";
+            }
+            
+            showNotification(errorMessage, "error");
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const closeNotification = () => {
+        setNotification({ message: "", type: "", show: false });
     };
 
     return (
@@ -58,6 +156,40 @@ export default function Login() {
                 <div className="absolute top-1/2 right-1/3 w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce" style={{animationDelay: '3s'}}></div>
             </div>
 
+            {/* Notification Toast */}
+            {notification.show && (
+                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border-l-4 flex items-center justify-between max-w-md transform transition-all duration-300 ${
+                    notification.type === 'success' 
+                        ? 'bg-green-50 border-green-500 text-green-700' 
+                        : 'bg-red-50 border-red-500 text-red-700'
+                }`}>
+                    <div className="flex items-center">
+                        <div className={`w-5 h-5 rounded-full mr-3 flex items-center justify-center ${
+                            notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                        }`}>
+                            {notification.type === 'success' ? (
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                            ) : (
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            )}
+                        </div>
+                        <span className="text-sm font-medium">{notification.message}</span>
+                    </div>
+                    <button 
+                        onClick={closeNotification}
+                        className="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 relative z-10 transform transition-all duration-500 hover:scale-105 border border-white/20">
                 {/* Glowing border effect */}
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-sm animate-pulse"></div>
@@ -73,22 +205,31 @@ export default function Login() {
                     <div className="relative">
                         <input
                             name="identifier"
+                            type="email"
                             value={formData.identifier}
                             onChange={handleInputChange}
                             onFocus={() => setFocusedField("identifier")}
                             onBlur={() => setFocusedField("")}
                             placeholder="Email"
+                            aria-label="Email address"
+                            aria-invalid={errors.identifier ? 'true' : 'false'}
+                            aria-describedby={errors.identifier ? 'identifier-error' : undefined}
                             required
                             className={`w-full p-4 rounded-xl border-2 transition-all duration-300 bg-white/80 backdrop-blur-sm
-                                ${focusedField === "identifier" 
-                                    ? "border-blue-500 shadow-lg shadow-blue-500/20 bg-white" 
-                                    : "border-gray-200 hover:border-gray-300"
+                                ${errors.identifier 
+                                    ? "border-red-500 shadow-lg shadow-red-500/20" 
+                                    : focusedField === "identifier" 
+                                        ? "border-blue-500 shadow-lg shadow-blue-500/20 bg-white" 
+                                        : "border-gray-200 hover:border-gray-300"
                                 }
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
                         />
                         <div className={`absolute left-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 rounded-full ${
                             focusedField === "identifier" ? "w-full" : "w-0"
                         }`}></div>
+                        {errors.identifier && (
+                            <p id="identifier-error" className="text-red-500 text-xs mt-1 ml-2">{errors.identifier}</p>
+                        )}
                     </div>
 
                     <div className="relative">
@@ -100,22 +241,31 @@ export default function Login() {
                             onFocus={() => setFocusedField("password")}
                             onBlur={() => setFocusedField("")}
                             placeholder="Password"
+                            aria-label="Password"
+                            aria-invalid={errors.password ? 'true' : 'false'}
+                            aria-describedby={errors.password ? 'password-error' : undefined}
                             required
                             className={`w-full p-4 rounded-xl border-2 transition-all duration-300 bg-white/80 backdrop-blur-sm
-                                ${focusedField === "password" 
-                                    ? "border-blue-500 shadow-lg shadow-blue-500/20 bg-white" 
-                                    : "border-gray-200 hover:border-gray-300"
+                                ${errors.password 
+                                    ? "border-red-500 shadow-lg shadow-red-500/20" 
+                                    : focusedField === "password" 
+                                        ? "border-blue-500 shadow-lg shadow-blue-500/20 bg-white" 
+                                        : "border-gray-200 hover:border-gray-300"
                                 }
                                 focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
                         />
                         <div className={`absolute left-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 rounded-full ${
                             focusedField === "password" ? "w-full" : "w-0"
                         }`}></div>
+                        {errors.password && (
+                            <p id="password-error" className="text-red-500 text-xs mt-1 ml-2">{errors.password}</p>
+                        )}
                     </div>
 
                     <button
                         type="submit"
                         disabled={isLoading}
+                        aria-describedby="login-button-description"
                         className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-105 active:scale-95 
                             ${isLoading 
                                 ? "bg-gray-400 cursor-not-allowed" 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 
 function EditAdminDetail() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -10,7 +11,7 @@ function EditAdminDetail() {
     const fetchAdmin = async () => {
       try {
         const token = localStorage.getItem("adminToken");
-        const response = await axios.get('http://localhost:5000/api/admins/me', {
+        const response = await axios.get(`${API_BASE_URL}/api/admins/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setFormData({ ...response.data, password: '' }); // don't fill in password
@@ -31,7 +32,7 @@ function EditAdminDetail() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("adminToken");
-      await axios.put('http://localhost:5000/api/admins/me', formData, {
+      await axios.put(`${API_BASE_URL}/api/admins/me`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Admin details updated successfully.");
