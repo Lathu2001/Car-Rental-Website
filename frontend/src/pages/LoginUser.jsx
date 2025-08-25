@@ -17,7 +17,7 @@ export default function UserDashboard() {
             return;
         }
 
-        axios.get(`${API_BASE_URL}/api/api/users/me`, {
+        axios.get(`${API_BASE_URL}/api/users/me`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

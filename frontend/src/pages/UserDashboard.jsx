@@ -503,7 +503,7 @@ const Car = () => {
                   </div>
 
                   {/* Select Button */}
-                  <Link to={`/booking`} style={{ textDecoration: 'none' }}>
+                  <Link to={`/book-car/${car.carId}`} style={{ textDecoration: 'none' }}>
                     <div
                       style={{
                         display: 'flex',
