@@ -1,3 +1,4 @@
+// src/pages/Login.jsx
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,11 @@ export default function Login() {
     const [focusedField, setFocusedField] = useState("");
     const [notification, setNotification] = useState({ message: "", type: "", show: false });
     const [errors, setErrors] = useState({});
+
+    // Forgot password modal state
+    const [showForgot, setShowForgot] = useState(false);
+    const [fpEmail, setFpEmail] = useState("");
+    const [fpLoading, setFpLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -28,7 +34,7 @@ export default function Login() {
     const validateForm = () => {
         const newErrors = {};
 
-        // Email validation
+        // Email validation (your API accepts identifier; here we enforce email format as your UI suggests)
         if (!formData.identifier) {
             newErrors.identifier = "Email is required";
         } else if (!formData.identifier.includes('@')) {
@@ -79,7 +85,7 @@ export default function Login() {
                 throw new Error("Invalid response from server");
             }
                       
-            // Store user data securely (consider using sessionStorage for better security)
+            // Store user data securely (sessionStorage per your dashboard)
             sessionStorage.setItem("token", token);
             sessionStorage.setItem("userId", user.id);
             sessionStorage.setItem("username", user.name || user.username || "User");
@@ -136,6 +142,43 @@ export default function Login() {
 
     const closeNotification = () => {
         setNotification({ message: "", type: "", show: false });
+    };
+
+    // Forgot password handlers
+    const openForgot = () => {
+        setFpEmail(formData.identifier || "");
+        setShowForgot(true);
+    };
+
+    const closeForgot = () => {
+        setShowForgot(false);
+        setFpLoading(false);
+    };
+
+    const handleForgotSubmit = async (e) => {
+        e.preventDefault();
+
+        // Simple email check to match your login validation
+        if (!fpEmail || !fpEmail.includes('@')) {
+            showNotification("Enter a valid email to receive the reset link.", "error");
+            return;
+        }
+
+        setFpLoading(true);
+        try {
+            await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, { email: fpEmail }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+            showNotification("If that email exists, a reset link has been sent.", "success");
+            closeForgot();
+        } catch (err) {
+            console.error('Forgot password error:', err);
+            showNotification(
+                err?.response?.data?.message || "Could not start password reset. Try again later.",
+                "error"
+            );
+            setFpLoading(false);
+        }
     };
 
     return (
@@ -260,6 +303,16 @@ export default function Login() {
                         {errors.password && (
                             <p id="password-error" className="text-red-500 text-xs mt-1 ml-2">{errors.password}</p>
                         )}
+                        {/* Forgot link */}
+                        <div className="mt-2 text-right">
+                            <button
+                                type="button"
+                                onClick={openForgot}
+                                className="text-sm text-blue-600 hover:text-purple-600 underline decoration-2 underline-offset-4 transition-colors"
+                            >
+                                Forgot password?
+                            </button>
+                        </div>
                     </div>
 
                     <button
@@ -299,6 +352,54 @@ export default function Login() {
                     </p>
                 </div>
             </div>
+
+            {/* Forgot Password Modal */}
+            {showForgot && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 relative">
+                        <button
+                            onClick={closeForgot}
+                            className="absolute right-3 top-3 p-2 rounded hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+
+                        <h2 className="text-xl font-semibold mb-2">Reset your password</h2>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Enter the email associated with your account. We’ll send you a reset link.
+                        </p>
+
+                        <form onSubmit={handleForgotSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-gray-600 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    value={fpEmail}
+                                    onChange={(e) => setFpEmail(e.target.value)}
+                                    placeholder="you@example.com"
+                                    required
+                                    className="w-full p-3 border rounded-lg bg-white/80 outline-none focus:ring-2 focus:ring-blue-500/30"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={fpLoading}
+                                className={`w-full py-3 rounded-xl text-white font-semibold transition-all ${
+                                    fpLoading
+                                        ? "bg-gray-400 cursor-not-allowed"
+                                        : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
+                                }`}
+                            >
+                                {fpLoading ? "Sending…" : "Send reset link"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

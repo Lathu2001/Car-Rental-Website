@@ -30,9 +30,10 @@ import EditAdminDetail from "./pages/EditeAdminDetail.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
 import AdminBookingPage from "./pages/AdminBookingPage.jsx";
 import AdminSuccess from "./pages/AdminSuccess.jsx";
-
-// NEW: Change Password page
 import AdminChangePassword from "./pages/AdminChangePassword.jsx";
+
+// NEW: Reset Password page
+import ResetPassword from "./pages/ResetPassword.jsx";
 
 function AppLayout() {
   const location = useLocation(); 
@@ -63,7 +64,6 @@ function AppLayout() {
     location.pathname.startsWith("/Admin-Booking") ||
     location.pathname.startsWith("/Admin-booking-success") ||
     location.pathname.startsWith("/user-detail") ||
-    // NEW: ensure admin header/footer on change-password route
     location.pathname.startsWith("/admin-change-password");
 
   return (
@@ -75,6 +75,7 @@ function AppLayout() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/admin-register" element={<AdminRegister />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/Car" element={<Car/>} />
@@ -90,7 +91,6 @@ function AppLayout() {
         <Route path="/All-bookings" element={<AdminBookings/>} />
         <Route path="/Admin-Booking" element={<AdminBookingPage/>} />
         <Route path="/Admin-booking-success" element={<AdminSuccess/>} />
-        {/* NEW: Change Password */}
         <Route path="/admin-change-password" element={<AdminChangePassword />} />
 
         {/* User Routes (Uses UserHeader) */}
@@ -109,12 +109,10 @@ function AppLayout() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <AppLayout />
     </BrowserRouter>
   );
 }
-
-export default App;
