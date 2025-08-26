@@ -19,7 +19,8 @@ app.use(express.json());
 const allowedOrigins = [
     'http://localhost:5173', 
     //'https://car-rental-website-p4r9.vercel.app'
-    'https://car-rental-website-ci4p.vercel.app'
+    //'https://car-rental-website-ci4p.vercel.app'
+    'https://isga-enterprise.vercel.app'
 ];
 
 app.use(cors({
