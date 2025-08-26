@@ -101,13 +101,13 @@ const UserFooter = () => {
                       href="tel:+94777800060" 
                       className="block text-gray-300 hover:text-cyan-300 transition-all duration-300 hover:translate-x-1 text-sm"
                     >
-                      +94-777-800060
+                      0777800060
                     </a>
                     <a 
                       href="tel:+94706668666" 
                       className="block text-gray-300 hover:text-cyan-300 transition-all duration-300 hover:translate-x-1 text-sm"
                     >
-                      +94-706-668666
+                      0706300000
                     </a>
                   </div>
                 </div>
@@ -161,7 +161,7 @@ const UserFooter = () => {
               <p className="text-gray-300">
                 &copy; {new Date().getFullYear()} 
                 <span className="font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent mx-2">
-                  ISGA Holdings PVT LTD
+                  ISGA ENTERPRISE PVT LTD 
                 </span>
                 All rights reserved.
               </p>

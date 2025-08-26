@@ -17,7 +17,8 @@ import {
   ChevronRight,
   XCircle
 } from "lucide-react";
-import logo from '../../assets/Images/logo.png';
+
+import logo from '../../assets/Images/logo1.jpg';
 
 /** ---------- Small helpers ---------- */
 const BOOKINGS_API = `${API_BASE_URL}/api/bookings`;
