@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
 const Car = require('../models/car');
-const auth = require('../middleware/authMiddleware'); // Assuming you have auth middleware
+const BookingHistory = require('../models/BookingHistory'); // <-- Add this line
 
 // ✅ Create admin booking (cash payment)
 router.post('/bookings', async (req, res) => {
@@ -480,6 +480,56 @@ router.get('/stats/payments', async (req, res) => {
       message: 'Error fetching payment statistics',
       error: error.message
     });
+  }
+});
+
+// Mark booking as completed and move to history
+router.put('/bookings/:id/complete', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('car');
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Create history record
+    const history = new BookingHistory({
+      bookingId: booking._id,
+      car: booking.car._id,
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone,
+      altPhone: booking.altPhone,
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      withDriver: booking.withDriver,
+      weddingPurpose: booking.weddingPurpose,
+      totalAmount: booking.totalAmount,
+      paidAmount: booking.paidAmount,
+      paymentMethod: booking.paymentMethod,
+      notes: booking.notes,
+      isAdminBooking: booking.isAdminBooking,
+      completedAt: new Date()
+    });
+    await history.save();
+
+    // Remove from active bookings
+    await booking.deleteOne();
+
+    res.json({ message: 'Booking completed and moved to history.' });
+  } catch (error) {
+    console.error('Error completing booking:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get booking history
+router.get('/history', async (req, res) => {
+  try {
+    const history = await BookingHistory.find().populate('car');
+    res.json(history);
+  } catch (error) {
+    console.error('Error fetching booking history:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
