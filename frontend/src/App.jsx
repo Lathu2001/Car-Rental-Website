@@ -1,3 +1,4 @@
+// src/App.jsx
 import { Routes, Route, BrowserRouter, useLocation } from "react-router-dom";
 import Header from "./components/Header/Header.jsx";
 import UserHeader from "./components/Header/UserHeader.jsx";
@@ -32,8 +33,9 @@ import AdminBookingPage from "./pages/AdminBookingPage.jsx";
 import AdminSuccess from "./pages/AdminSuccess.jsx";
 import AdminChangePassword from "./pages/AdminChangePassword.jsx";
 
-// NEW: Reset Password page
+// NEW: Reset Password pages
 import ResetPassword from "./pages/ResetPassword.jsx";
+import AdminResetPassword from "./pages/AdminResetPassword.jsx";
 
 function AppLayout() {
   const location = useLocation(); 
@@ -78,6 +80,7 @@ function AppLayout() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/admin-register" element={<AdminRegister />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin-reset-password/:token" element={<AdminResetPassword />} />
         <Route path="/Car" element={<Car/>} />
 
         {/* Admin Routes (Uses AdminHeader) */}
