@@ -29,8 +29,10 @@ import AdminBookings from "./pages/AdminBooking.jsx";
 import EditAdminDetail from "./pages/EditeAdminDetail.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
 import AdminBookingPage from "./pages/AdminBookingPage.jsx";
-import AdminSuccess from"./pages/AdminSuccess.jsx";
+import AdminSuccess from "./pages/AdminSuccess.jsx";
 
+// NEW: Change Password page
+import AdminChangePassword from "./pages/AdminChangePassword.jsx";
 
 function AppLayout() {
   const location = useLocation(); 
@@ -60,7 +62,9 @@ function AppLayout() {
     location.pathname.startsWith("/edit-admin-detail") ||
     location.pathname.startsWith("/Admin-Booking") ||
     location.pathname.startsWith("/Admin-booking-success") ||
-    location.pathname.startsWith("/user-detail");
+    location.pathname.startsWith("/user-detail") ||
+    // NEW: ensure admin header/footer on change-password route
+    location.pathname.startsWith("/admin-change-password");
 
   return (
     <>
@@ -76,7 +80,6 @@ function AppLayout() {
         <Route path="/Car" element={<Car/>} />
 
         {/* Admin Routes (Uses AdminHeader) */}
-        
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/add-car" element={<AddCar />} />
         <Route path="/edit-car/:carId" element={<EditCar />} />
@@ -86,9 +89,9 @@ function AppLayout() {
         <Route path="/user-detail" element={<UserDetail/>} /> 
         <Route path="/All-bookings" element={<AdminBookings/>} />
         <Route path="/Admin-Booking" element={<AdminBookingPage/>} />
-        <Route path="/Admin-booking-success" element={<AdminSuccess/>} />  
-
-
+        <Route path="/Admin-booking-success" element={<AdminSuccess/>} />
+        {/* NEW: Change Password */}
+        <Route path="/admin-change-password" element={<AdminChangePassword />} />
 
         {/* User Routes (Uses UserHeader) */}
         <Route path="/user-home" element={<UserHome/>} />
@@ -99,9 +102,9 @@ function AppLayout() {
         <Route path="/edit-user-account" element={<EditUserAccount/>} />    
         <Route path="/my-booking" element={<MyBookings/>} />
         <Route path="/payment" element={<PaymentPage />} />
-
       </Routes>
-     {isUserPage ? <UserFooter/> : isAdminPage ? <AdminFooter/> : <Footer />}
+
+      {isUserPage ? <UserFooter/> : isAdminPage ? <AdminFooter/> : <Footer />}
     </>
   );
 }

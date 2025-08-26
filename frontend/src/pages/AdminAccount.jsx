@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Mail, Settings, Edit3, Save, X, Shield } from 'lucide-react';
+import { User, Mail, Settings, Edit3, Save, X, Shield, KeyRound } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
@@ -99,8 +99,25 @@ const AdminAccount = () => {
 
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'} relative overflow-hidden`}>
-            {/* Theme Toggle */}
-            <div className="absolute top-6 right-6 z-20">
+            {/* Top-right buttons */}
+            <div className="absolute top-6 right-6 z-20 flex items-center gap-3">
+                {/* Change Password Button with Icon + Text */}
+                <button
+                    onClick={() => navigate('/admin-change-password')}
+                    title="Change Password"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium ${
+                        isDarkMode
+                            ? 'bg-white/10 text-white hover:bg-white/20'
+                            : 'bg-white/80 text-gray-700 hover:bg-white'
+                    } backdrop-blur-lg border ${
+                        isDarkMode ? 'border-white/20' : 'border-white/40'
+                    } transition-all duration-300`}
+                >
+                    <KeyRound className="w-5 h-5" />
+                    Change Password
+                </button>
+
+                {/* Theme Toggle */}
                 <button
                     onClick={() => setIsDarkMode(!isDarkMode)}
                     className={`p-3 rounded-full ${isDarkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white/80 text-gray-700 hover:bg-white'} backdrop-blur-lg border ${isDarkMode ? 'border-white/20' : 'border-white/40'} transition-all duration-300`}
@@ -274,29 +291,12 @@ const AdminAccount = () => {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 
-                .animate-fade-in {
-                    animation: fade-in 0.3s ease-out;
-                }
-                
-                .animation-delay-1000 {
-                    animation-delay: 1s;
-                }
-                
-                .animation-delay-2000 {
-                    animation-delay: 2s;
-                }
-                
-                .animation-delay-3000 {
-                    animation-delay: 3s;
-                }
-                
-                .animation-delay-4000 {
-                    animation-delay: 4s;
-                }
-                
-                .animation-delay-5000 {
-                    animation-delay: 5s;
-                }
+                .animate-fade-in { animation: fade-in 0.3s ease-out; }
+                .animation-delay-1000 { animation-delay: 1s; }
+                .animation-delay-2000 { animation-delay: 2s; }
+                .animation-delay-3000 { animation-delay: 3s; }
+                .animation-delay-4000 { animation-delay: 4s; }
+                .animation-delay-5000 { animation-delay: 5s; }
             `}</style>
         </div>
     );

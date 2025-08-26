@@ -5,7 +5,8 @@ const {
     loginAdmin,
     getAdminDetails,
     updateAdmin,
-    deleteAdmin
+    deleteAdmin,
+    changeAdminPassword // NEW
 } = require('../controllers/adminController');
 
 const authenticateAdmin = require('../middleware/authenticateAdmin');
@@ -13,9 +14,10 @@ const authenticateAdmin = require('../middleware/authenticateAdmin');
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 
-// New routes for authenticated admin
+// Authenticated admin routes
 router.get('/me', authenticateAdmin, getAdminDetails);
 router.put('/update', authenticateAdmin, updateAdmin);
+router.post('/change-password', authenticateAdmin, changeAdminPassword); // NEW
 router.delete('/delete', authenticateAdmin, deleteAdmin);
 
 module.exports = router;

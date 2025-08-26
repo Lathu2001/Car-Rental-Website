@@ -183,6 +183,40 @@ exports.updateAdmin = async (req, res) => {
 
 
 /* ================================
+   CHANGE PASSWORD (NEW, safer)
+   - Verifies current password
+================================ */
+exports.changeAdminPassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current and new password are required' });
+        }
+        if (String(newPassword).length < 8) {
+            return res.status(400).json({ message: 'New password must be at least 8 characters' });
+        }
+
+        const admin = await Admin.findById(req.admin.id);
+        if (!admin) return res.status(404).json({ message: 'Admin not found' });
+
+        const ok = await bcrypt.compare(currentPassword, admin.password);
+        if (!ok) return res.status(400).json({ message: 'Current password is incorrect' });
+
+        const saltRounds = 12;
+        admin.password = await bcrypt.hash(newPassword, saltRounds);
+        await admin.save();
+
+        // Optional: you could send an email notification here
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (err) {
+        console.error('changeAdminPassword error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+/* ================================
    DELETE ADMIN
 ================================ */
 exports.deleteAdmin = async (req, res) => {
