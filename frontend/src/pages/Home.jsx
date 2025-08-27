@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Slider from 'react-slick';
 import { Link } from "react-router-dom";
@@ -92,6 +92,12 @@ const reviewSettings = {
   slidesToScroll: 1,
   autoplay: true,
   autoplaySpeed: 3000,
+  adaptiveHeight: true,
+  pauseOnHover: true,
+  pauseOnFocus: true,
+  pauseOnDotsHover: true,
+  touchThreshold: 12,
+  swipeToSlide: true,
   nextArrow: <NextArrow />,
   prevArrow: <PrevArrow />,
   responsive: [
@@ -108,6 +114,12 @@ const singleSliderSettings = {
   slidesToScroll: 1,
   autoplay: true,
   autoplaySpeed: 2500,
+  adaptiveHeight: true,
+  pauseOnHover: true,
+  pauseOnFocus: true,
+  pauseOnDotsHover: true,
+  touchThreshold: 12,
+  swipeToSlide: true,
   nextArrow: <NextArrow />,
   prevArrow: <PrevArrow />,
   responsive: [
@@ -129,6 +141,11 @@ export default function Home() {
     userId: sessionStorage.getItem("userId") || localStorage.getItem("userId") || "",
     userName: sessionStorage.getItem("username") || localStorage.getItem("username") || ""
   }));
+
+  // Slider refs for visibility pause/resume
+  const availRef = useRef(null);
+  const weddingRef = useRef(null);
+  const reviewsRef = useRef(null);
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -161,6 +178,23 @@ export default function Home() {
       }
     };
     fetchReviews();
+  }, []);
+
+  // Pause/resume sliders when tab visibility changes
+  useEffect(() => {
+    const handler = () => {
+      if (document.hidden) {
+        availRef.current?.slickPause?.();
+        weddingRef.current?.slickPause?.();
+        reviewsRef.current?.slickPause?.();
+      } else {
+        availRef.current?.slickPlay?.();
+        weddingRef.current?.slickPlay?.();
+        reviewsRef.current?.slickPlay?.();
+      }
+    };
+    document.addEventListener('visibilitychange', handler);
+    return () => document.removeEventListener('visibilitychange', handler);
   }, []);
 
   const showToast = (message, type = 'info', duration = 1800) => {
@@ -311,7 +345,7 @@ export default function Home() {
               { bg: 'bg-green-100', icon: CalendarIcon, title: 'Flexible Bookings', desc: 'Easy online booking system with instant confirmation', hover: 'group-hover:bg-green-600', txt: 'text-green-600' },
               { bg: 'bg-purple-100', icon: ShieldCheckIcon, title: 'Safety First', desc: 'Regularly serviced vehicles with comprehensive insurance', hover: 'group-hover:bg-purple-600', txt: 'text-purple-600' },
               { bg: 'bg-orange-100', icon: ClockIcon, title: '24/7 Support', desc: 'Round-the-clock customer service and roadside assistance', hover: 'group-hover:bg-orange-600', txt: 'text-orange-600' },
-            ].map(({ bg, icon: Icon, title, desc, hover, txt }, idx) => (
+            ].map(({ bg, icon: Icon, title, desc, hover, txt }) => (
               <div
                 key={title}
                 className="group bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 hover:border-blue-200 h-full"
@@ -352,7 +386,7 @@ export default function Home() {
               </div>
 
               <div className="relative">
-                <Slider {...singleSliderSettings} className="max-w-xl mx-auto car-slider">
+                <Slider ref={availRef} {...singleSliderSettings} className="max-w-xl mx-auto car-slider">
                   {[car1, car2, car3, car4, car5].map((img, i) => (
                     <div key={i} className="px-2">
                       <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
@@ -389,7 +423,7 @@ export default function Home() {
               </div>
 
               <div className="relative">
-                <Slider {...singleSliderSettings} className="max-w-xl mx-auto wedding-slider">
+                <Slider ref={weddingRef} {...singleSliderSettings} className="max-w-xl mx-auto wedding-slider">
                   {[wedding1, wedding2, wedding3].map((img, i) => (
                     <div key={i} className="px-2">
                       <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
@@ -445,7 +479,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="relative">
-              <Slider {...reviewSettings} className="px-2 sm:px-4 reviews-slider">
+              <Slider ref={reviewsRef} {...reviewSettings} className="px-2 sm:px-4 reviews-slider">
                 {reviews.map((review) => (
                   <div key={review._id} className="px-2">
                     <div className="group bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 hover:border-blue-200 h-full">

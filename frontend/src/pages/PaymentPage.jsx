@@ -1,4 +1,4 @@
-// PaymentPage.js - Fixed version
+// PaymentPage.jsx
 import React, { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -29,7 +29,7 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
     try {
       // Create payment intent
       const { data } = await axios.post(`${API_BASE_URL}/api/payment/create-payment-intent`, {
-        amount: depositAmount * 100, // Convert to cents
+        amount: depositAmount * 100, // cents
         bookingId: booking._id,
         metadata: {
           bookingId: booking._id,
@@ -54,12 +54,12 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
         setPaymentError(result.error.message);
         setIsProcessing(false);
       } else if (result.paymentIntent.status === 'succeeded') {
-        // Payment successful, confirm booking with payment details
+        // Confirm booking with payment details
         await axios.put(`${API_BASE_URL}/api/bookings/confirm/${booking._id}`, {
           paymentIntentId: result.paymentIntent.id,
-          paidAmount: depositAmount, // Add this
-          paymentMethod: 'card', // Add this
-          status: 'confirmed' // Add this
+          paidAmount: depositAmount,
+          paymentMethod: 'card',
+          status: 'confirmed'
         });
 
         onPaymentSuccess(result.paymentIntent);
@@ -76,26 +76,22 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
       <div className="card-section">
         <h3>Payment Information</h3>
         <div className="card-element-container">
-          <CardElement 
+          <CardElement
             options={{
               style: {
                 base: {
                   fontSize: '16px',
                   color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
+                  '::placeholder': { color: '#aab7c4' },
                   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 },
-                invalid: {
-                  color: '#9e2146',
-                },
+                invalid: { color: '#9e2146' },
               },
               hidePostalCode: true,
             }}
           />
         </div>
-        
+
         {paymentError && (
           <div className="error-message">
             <strong>Payment Error:</strong> {paymentError}
@@ -110,21 +106,17 @@ const CheckoutForm = ({ booking, car, depositAmount, onPaymentSuccess }) => {
         </div>
       </div>
 
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         className={`payment-submit-btn ${isProcessing ? 'processing' : ''}`}
         disabled={!stripe || isProcessing}
       >
-        {isProcessing 
-          ? 'Processing Payment...' 
-          : `Pay Deposit Rs. ${depositAmount.toLocaleString()}`
-        }
+        {isProcessing ? 'Processing Payment...' : `Pay Deposit Rs. ${depositAmount.toLocaleString()}`}
       </button>
     </form>
   );
 };
 
-// Rest of the PaymentPage component remains the same...
 const PaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,21 +128,16 @@ const PaymentPage = () => {
   useEffect(() => {
     if (!booking || !car) {
       navigate('/');
-      return;
     }
   }, [booking, car, navigate]);
 
   const handlePaymentSuccess = (intent) => {
     setPaymentIntent(intent);
     setPaymentSuccess(true);
-    
+
     setTimeout(() => {
       navigate('/booking-success', {
-        state: {
-          booking: booking,
-          car: car,
-          paymentIntent: intent
-        }
+        state: { booking, car, paymentIntent: intent }
       });
     }, 3000);
   };
@@ -168,12 +155,10 @@ const PaymentPage = () => {
     return (
       <div className="payment-page">
         <div className="container">
-          <div className="error-container">
+          <div className="success-container">
             <h2>Invalid Access</h2>
             <p>Please go through the booking process to access payment.</p>
-            <button onClick={() => navigate('/')} className="back-btn">
-              Go to Home
-            </button>
+            <button onClick={() => navigate('/')} className="back-button">Go to Home</button>
           </div>
         </div>
       </div>
@@ -192,13 +177,9 @@ const PaymentPage = () => {
               <p><strong>Payment ID:</strong> {paymentIntent?.id}</p>
               <p><strong>Amount Paid:</strong> Rs. {depositAmount.toLocaleString()}</p>
             </div>
-            <p className="redirect-message">
-              Redirecting to confirmation page in a few seconds...
-            </p>
-            <button 
-              onClick={() => navigate('/booking-success', {
-                state: { booking, car, paymentIntent }
-              })}
+            <p className="redirect-message">Redirecting to confirmation page in a few seconds...</p>
+            <button
+              onClick={() => navigate('/booking-success', { state: { booking, car, paymentIntent } })}
               className="continue-btn"
             >
               Continue to Confirmation
@@ -223,9 +204,15 @@ const PaymentPage = () => {
         <div className="payment-content">
           <div className="booking-summary-card">
             <h2>Booking Summary</h2>
-            
+
             <div className="car-summary">
-              <img src={car.imageUrl || car.image} alt={car.model} className="car-image-small" />
+              <img
+                src={car.imageUrl || car.image || 'https://via.placeholder.com/600x360?text=Vehicle'}
+                alt={car.model}
+                className="car-image-small"
+                loading="lazy"
+                onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/600x360?text=Vehicle'; }}
+              />
               <div className="car-details">
                 <h3>{car.model}</h3>
                 <p>Registration: {car.carId}</p>
@@ -233,18 +220,9 @@ const PaymentPage = () => {
             </div>
 
             <div className="booking-details">
-              <div className="detail-row">
-                <span>Customer Name</span>
-                <span>{booking.name}</span>
-              </div>
-              <div className="detail-row">
-                <span>Email</span>
-                <span>{booking.email}</span>
-              </div>
-              <div className="detail-row">
-                <span>Phone</span>
-                <span>{booking.phone}</span>
-              </div>
+              <div className="detail-row"><span>Customer Name</span><span>{booking.name}</span></div>
+              <div className="detail-row"><span>Email</span><span>{booking.email}</span></div>
+              <div className="detail-row"><span>Phone</span><span>{booking.phone}</span></div>
               <div className="detail-row">
                 <span>Rental Period</span>
                 <span>
@@ -261,50 +239,50 @@ const PaymentPage = () => {
                 <span>Vehicle Rental ({days} {days === 1 ? 'day' : 'days'})</span>
                 <span>Rs. {(days * (isLongTerm ? car.longPeriodRentPerDay : car.rentPerDay)).toLocaleString()}</span>
               </div>
-              
+
               {isLongTerm && (
                 <div className="cost-item discount">
                   <span>Long-term Discount</span>
                   <span>- Rs. {((car.rentPerDay - car.longPeriodRentPerDay) * days).toLocaleString()}</span>
                 </div>
               )}
-              
+
               {booking.withDriver && (
                 <div className="cost-item">
                   <span>Driver Service ({days} {days === 1 ? 'day' : 'days'})</span>
                   <span>Rs. {(2500 * days).toLocaleString()}</span>
                 </div>
               )}
-              
+
               {booking.weddingPurpose && (
                 <div className="cost-item">
                   <span>Wedding Package</span>
                   <span>Rs. {car.weddingPurposeExtra?.toLocaleString()}</span>
                 </div>
               )}
-              
+
               <div className="cost-divider"></div>
-              
+
               <div className="cost-item total">
                 <span>Total Amount</span>
-                <span>Rs. {totalAmount.toLocaleString()}</span>
+                <span>Rs. {Number(location.state.totalAmount).toLocaleString()}</span>
               </div>
-              
+
               <div className="cost-item deposit">
                 <span>Deposit (30%)</span>
-                <span>Rs. {depositAmount.toLocaleString()}</span>
+                <span>Rs. {Number(location.state.depositAmount).toLocaleString()}</span>
               </div>
-              
+
               <div className="cost-item balance">
                 <span>Balance at Pickup</span>
-                <span>Rs. {(totalAmount - depositAmount).toLocaleString()}</span>
+                <span>Rs. {(Number(location.state.totalAmount) - Number(location.state.depositAmount)).toLocaleString()}</span>
               </div>
             </div>
           </div>
 
           <div className="payment-form-card">
             <Elements stripe={stripePromise}>
-              <CheckoutForm 
+              <CheckoutForm
                 booking={booking}
                 car={car}
                 depositAmount={depositAmount}
@@ -316,7 +294,7 @@ const PaymentPage = () => {
               <h4>Important Information</h4>
               <ul>
                 <li>You are paying a 30% deposit to secure your booking</li>
-                <li>The remaining balance of Rs. {(totalAmount - depositAmount).toLocaleString()} is due at vehicle pickup</li>
+                <li>The remaining balance of Rs. {(Number(totalAmount) - Number(depositAmount)).toLocaleString()} is due at vehicle pickup</li>
                 <li>Your booking will be confirmed immediately after successful payment</li>
                 <li>A confirmation email will be sent to {booking.email}</li>
                 <li>Cancellations must be made 24 hours before pickup</li>
@@ -326,12 +304,7 @@ const PaymentPage = () => {
         </div>
 
         <div className="navigation-section">
-          <button 
-            onClick={() => navigate(-1)}
-            className="back-button"
-          >
-            ← Back to Booking Details
-          </button>
+          <button onClick={() => navigate(-1)} className="back-button">← Back to Booking Details</button>
         </div>
       </div>
     </div>

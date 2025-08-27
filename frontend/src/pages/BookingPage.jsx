@@ -1,4 +1,4 @@
-// BookingPage.js - Simplified Debug Version (sessionStorage + scroll-to-top)
+// Booking.jsx — mobile & desktop friendly (uses BookingPage.css)
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -31,19 +31,14 @@ const BookingPage = () => {
   const [dateError, setDateError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- Ensure page starts at the top when this component mounts ---
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, []);
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); }, []);
 
-  // --- Helper: today (midnight) ---
   const getTodayDate = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return today;
   };
 
-  // --- Dates utilities ---
   const getUnavailableDates = () => {
     const unavailableDates = [];
     bookedDates.forEach((booking) => {
@@ -77,10 +72,8 @@ const BookingPage = () => {
   const getDayClassName = (date) => (isDateUnavailable(date) ? 'react-datepicker__day--booked' : '');
   const filterDate = (date) => !isDateUnavailable(date);
 
-  // --- Fetch data ---
   useEffect(() => {
     const fetchUserData = async () => {
-      // Migrate any legacy localStorage token to sessionStorage (one-time)
       const sessionTok = sessionStorage.getItem('token');
       const legacyTok = localStorage.getItem('token');
       if (!sessionTok && legacyTok) {
@@ -88,9 +81,8 @@ const BookingPage = () => {
         localStorage.removeItem('token');
       }
 
-      const token = sessionStorage.getItem('token'); // 🔁 Use sessionStorage only
+      const token = sessionStorage.getItem('token');
       let debugMessages = [];
-
       debugMessages.push(`Token exists: ${!!token}`);
 
       if (token) {
@@ -99,7 +91,6 @@ const BookingPage = () => {
           const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-
           debugMessages.push('API call successful');
           debugMessages.push(`Response status: ${userResponse.status}`);
 
@@ -108,19 +99,9 @@ const BookingPage = () => {
           setUser(userData);
 
           const autoFillData = {
-            name:
-              userData.name ||
-              userData.fullName ||
-              userData.firstName ||
-              userData.username ||
-              '',
+            name: userData.name || userData.fullName || userData.firstName || userData.username || '',
             email: userData.email || userData.emailAddress || '',
-            phone:
-              userData.phone ||
-              userData.phoneNumber ||
-              userData.mobile ||
-              userData.contactNumber ||
-              '',
+            phone: userData.phone || userData.phoneNumber || userData.mobile || userData.contactNumber || '',
           };
 
           debugMessages.push(`Auto-fill data: ${JSON.stringify(autoFillData, null, 2)}`);
@@ -174,15 +155,12 @@ const BookingPage = () => {
     const e = new Date(end);
     if (s.getTime() === e.getTime()) return 1;
     const diffTime = Math.abs(e - s);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // include both start & end
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleDateChange = (date, field) => {
@@ -210,9 +188,7 @@ const BookingPage = () => {
     setFormData(newFormData);
   };
 
-  // Manual test button helper
   const testUserFetch = async () => {
-    // Also migrate if needed so devs don't get "No token" alerts
     const sessionTok = sessionStorage.getItem('token');
     const legacyTok = localStorage.getItem('token');
     if (!sessionTok && legacyTok) {
@@ -236,13 +212,12 @@ const BookingPage = () => {
     }
   };
 
-  // Pricing logic
   const isLongTerm = days >= 30;
   const baseRentPerDay = car ? (isLongTerm ? car.longPeriodRentPerDay : car.rentPerDay) : 0;
   const totalAmount = car
     ? days * baseRentPerDay + (formData.driver ? 2500 * days : 0) + (formData.weddingPurpose ? car.weddingPurposeExtra : 0)
     : 0;
-  const depositAmount = Math.round(totalAmount * 0.3); // 30%
+  const depositAmount = Math.round(totalAmount * 0.3);
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
@@ -338,62 +313,48 @@ const BookingPage = () => {
           <p>Complete your booking details</p>
         </div>
 
-        {/* Professional Car Information Card */}
+        {/* Car Info */}
         <div className="car-card">
           <div className="car-image">
-            <img src={car.imageUrl || car.image} alt={car.model} />
+            <img
+              src={car.imageUrl || car.image || 'https://via.placeholder.com/960x540?text=Vehicle'}
+              alt={car.model}
+              loading="lazy"
+              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/960x540?text=Vehicle'; }}
+            />
           </div>
           <div className="car-info">
             <h2 className="car-title">{car.model}</h2>
 
-            {/* Professional Car Details Grid */}
             <div className="car-details-grid">
               <div className="detail-card">
-                <div className="detail-header">
-                  <span className="detail-icon">🏷️</span>
-                  <span className="detail-label">Registration</span>
-                </div>
+                <div className="detail-header"><span className="detail-icon">🏷️</span><span className="detail-label">Registration</span></div>
                 <div className="detail-value">{car.carId}</div>
               </div>
 
               <div className="detail-card">
-                <div className="detail-header">
-                  <span className="detail-icon">💰</span>
-                  <span className="detail-label">Daily Rate</span>
-                </div>
+                <div className="detail-header"><span className="detail-icon">💰</span><span className="detail-label">Daily Rate</span></div>
                 <div className="detail-value">Rs. {car.rentPerDay?.toLocaleString()}</div>
               </div>
 
               <div className="detail-card">
-                <div className="detail-header">
-                  <span className="detail-icon">📅</span>
-                  <span className="detail-label">Long Term Rate</span>
-                </div>
+                <div className="detail-header"><span className="detail-icon">📅</span><span className="detail-label">Long Term Rate</span></div>
                 <div className="detail-value long-term">Rs. {car.longPeriodRentPerDay?.toLocaleString()}/day</div>
                 <div className="detail-subtitle">30+ days</div>
               </div>
 
               <div className="detail-card">
-                <div className="detail-header">
-                  <span className="detail-icon">⛽</span>
-                  <span className="detail-label">Fuel Efficiency</span>
-                </div>
+                <div className="detail-header"><span className="detail-icon">⛽</span><span className="detail-label">Fuel Efficiency</span></div>
                 <div className="detail-value">{car.fuelCostPerKm || 'N/A'} Km/l</div>
               </div>
 
               <div className="detail-card">
-                <div className="detail-header">
-                  <span className="detail-icon">👥</span>
-                  <span className="detail-label">Capacity</span>
-                </div>
+                <div className="detail-header"><span className="detail-icon">👥</span><span className="detail-label">Capacity</span></div>
                 <div className="detail-value">{car.passengerCount} Passengers</div>
               </div>
 
               <div className="detail-card">
-                <div className="detail-header">
-                  <span className="detail-icon">💒</span>
-                  <span className="detail-label">Wedding Service</span>
-                </div>
+                <div className="detail-header"><span className="detail-icon">💒</span><span className="detail-label">Wedding Service</span></div>
                 <div className="detail-value">+ Rs. {car.weddingPurposeExtra?.toLocaleString()}</div>
               </div>
             </div>
@@ -407,7 +368,7 @@ const BookingPage = () => {
           </div>
         )}
 
-        {/* Professional Booking Form */}
+        {/* Booking Form */}
         <div className="form-container">
           <form onSubmit={handleBookingSubmit}>
             {/* Personal Information */}
@@ -416,46 +377,19 @@ const BookingPage = () => {
               <div className="form-grid">
                 <div className="form-field">
                   <label>Full Name *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    placeholder="Enter your full name"
-                  />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="Enter your full name" />
                 </div>
                 <div className="form-field">
                   <label>Email Address *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    placeholder="Enter your email address"
-                  />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Enter your email address" />
                 </div>
                 <div className="form-field">
                   <label>Primary Phone *</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    placeholder="Enter your phone number"
-                  />
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required placeholder="Enter your phone number" />
                 </div>
                 <div className="form-field">
                   <label>Alternative Phone</label>
-                  <input
-                    type="tel"
-                    name="altPhone"
-                    value={formData.altPhone}
-                    onChange={handleChange}
-                    placeholder="Enter alternative phone number"
-                  />
+                  <input type="tel" name="altPhone" value={formData.altPhone} onChange={handleChange} placeholder="Enter alternative phone number" />
                 </div>
               </div>
             </div>
@@ -503,6 +437,7 @@ const BookingPage = () => {
                   <small className="date-helper">Select your return date</small>
                 </div>
               </div>
+
               {isLongTerm && (
                 <div className="long-term-notice">
                   <strong>Long-term Discount Applied:</strong> You're saving Rs. {(
@@ -525,12 +460,7 @@ const BookingPage = () => {
                 </label>
 
                 <label className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    name="weddingPurpose"
-                    checked={formData.weddingPurpose}
-                    onChange={handleChange}
-                  />
+                  <input type="checkbox" name="weddingPurpose" checked={formData.weddingPurpose} onChange={handleChange} />
                   <div className="checkbox-content">
                     <span>Wedding & Special Events Package</span>
                     <span className="price">Rs. {car.weddingPurposeExtra?.toLocaleString()}</span>
@@ -539,7 +469,7 @@ const BookingPage = () => {
               </div>
             </div>
 
-            {/* Professional Booking Summary */}
+            {/* Summary */}
             {days > 0 && (
               <div className="summary-card">
                 <h3>Booking Summary</h3>
@@ -551,9 +481,7 @@ const BookingPage = () => {
                   {isLongTerm && (
                     <div className="summary-row discount">
                       <span>Long-term Discount</span>
-                      <span>
-                        - Rs. {((car.rentPerDay - car.longPeriodRentPerDay) * days).toLocaleString()}
-                      </span>
+                      <span>- Rs. {((car.rentPerDay - car.longPeriodRentPerDay) * days).toLocaleString()}</span>
                     </div>
                   )}
                   {formData.driver && (
@@ -585,14 +513,22 @@ const BookingPage = () => {
               </div>
             )}
 
-            {/* Action Buttons */}
+            {/* Actions */}
             <div className="action-section">
               <div className="button-group">
-                <button type="button" className="back-button" onClick={() => navigate('/cars')}>
+                <button
+                  type="button"
+                  className="back-button"
+                  onClick={() => navigate('/car')}
+                >
                   ← Back to Cars
                 </button>
 
-                <button type="submit" className={`proceed-btn ${!isFormValid() ? 'disabled' : ''}`} disabled={!isFormValid()}>
+                <button
+                  type="submit"
+                  className={`proceed-btn ${!isFormValid() ? 'disabled' : ''}`}
+                  disabled={!isFormValid()}
+                >
                   {isSubmitting ? (
                     <>
                       <span className="spinner-small"></span>
@@ -611,18 +547,16 @@ const BookingPage = () => {
 
               {days > 0 && (
                 <div className="payment-info">
-                  <p>
-                    You will pay <strong>Rs. {depositAmount.toLocaleString()}</strong> now as deposit
-                  </p>
-                  <p>
-                    Remaining <strong>Rs. {(totalAmount - depositAmount).toLocaleString()}</strong> due at vehicle
-                    pickup
-                  </p>
+                  <p>You will pay <strong>Rs. {depositAmount.toLocaleString()}</strong> now as deposit</p>
+                  <p>Remaining <strong>Rs. {(totalAmount - depositAmount).toLocaleString()}</strong> due at vehicle pickup</p>
                 </div>
               )}
             </div>
           </form>
         </div>
+
+        {/* (Optional) Debug helper during dev */}
+        {/* <pre style={{whiteSpace:'pre-wrap',marginTop:16}}>{debugInfo}</pre> */}
       </div>
     </div>
   );
