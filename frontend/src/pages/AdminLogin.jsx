@@ -278,9 +278,7 @@ const AdminLogin = () => {
                 {fpLoading ? 'Sending…' : 'Send reset link'}
               </button>
 
-              <div className="text-xs text-gray-500 text-center">
-                You’ll receive a link like <code>/admin-reset-password/:token</code>
-              </div>
+              
             </form>
           </div>
         </div>

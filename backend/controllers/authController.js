@@ -8,7 +8,7 @@ require('dotenv').config();
 /* ================================
    EMAIL TRANSPORTER WITH BETTER CONFIG
 ================================ */
-const createTransporter = () => {
+const createTransport = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     throw new Error('EMAIL_USER or EMAIL_PASS environment variables not set');
   }
@@ -34,34 +34,51 @@ const createTransporter = () => {
   });
 };
 
-let transporter;
+let transport;
 try {
-  transporter = createTransporter();
-  console.log('✅ Mail transporter configured successfully');
-  
-  // Verify transporter configuration
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error('❌ SMTP verification failed:', error);
-    } else {
-      console.log('✅ SMTP server is ready to take our messages');
-    }
-  });
+  transport = createTransport();
+  console.log('✅ Mail transport configured successfully');
+  // Removed verification - will work when sending emails
 } catch (err) {
-  console.error('❌ Failed to configure mail transporter:', err.message);
+  console.error('❌ Failed to configure mail transport:', err.message);
 }
 
 /* ================================
    SEND EMAIL WITH RETRY LOGIC
 ================================ */
 async function sendEmailWithRetry(mailOptions, maxRetries = 3) {
-  if (!transporter) {
-    throw new Error('Email transporter not configured');
+  if (!transport) {
+    throw new Error('Email transport not configured');
+  }
+
+  // Verify connection on first use
+  if (!transport.verified) {
+    try {
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Verification timeout'));
+        }, 10000); // 10 second timeout for verification
+
+        transport.verify((error, success) => {
+          clearTimeout(timeout);
+          if (error) {
+            console.error('❌ SMTP verification failed on first use:', error.message);
+            reject(error);
+          } else {
+            console.log('✅ SMTP server verified on first use');
+            transport.verified = true;
+            resolve(success);
+          }
+        });
+      });
+    } catch (verifyError) {
+      console.log('⚠️ Verification failed but proceeding with send attempt');
+    }
   }
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const result = await transporter.sendMail(mailOptions);
+      const result = await transport.sendMail(mailOptions);
       console.log(`📧 Email sent successfully on attempt ${attempt}`);
       return result;
     } catch (error) {
@@ -191,8 +208,8 @@ exports.forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.CLIENT_URL || 'https://isga-enterprise.vercel.app'}/reset-password/${rawToken}`;
 
-    if (!transporter) {
-      console.error('❌ Email transporter not configured');
+    if (!transport) {
+      console.error('❌ Email transport not configured');
       return res.json({ message: 'If that email exists, a reset link has been sent.' });
     }
 
