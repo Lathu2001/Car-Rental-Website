@@ -1,18 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import API_BASE_URL from '../../config/api';
-import {
-  MoreVertical,
-  User,
-  LogOut,
-  Menu,
-  X,
-  Home,
-  Car,
-  Book,
-} from "lucide-react";
+import API_BASE_URL from "../../config/api";
+import { MoreVertical, User, LogOut, Menu, X, Home, Car, Book } from "lucide-react";
 import axios from "axios";
-import logo from '../../assets/Images/logo.png';
+import logo from "../../assets/Images/logo.png";
 
 function UserHeader() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -21,27 +12,26 @@ function UserHeader() {
   const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const drawerRef = useRef(null);
 
   // Fetch user data
   useEffect(() => {
-    const fetchUserData = async () => {
+    (async () => {
       try {
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem("token");
         if (token) {
-          const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
-            headers: { Authorization: `Bearer ${token}` }
+          const res = await axios.get(`${API_BASE_URL}/api/users/me`, {
+            headers: { Authorization: `Bearer ${token}` },
           });
-          setUser(userResponse.data);
+          setUser(res.data);
         }
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
+      } catch (e) {
+        console.error("Failed to fetch user data:", e);
       }
-    };
-
-    fetchUserData();
+    })();
   }, []);
 
-  // Detect scroll for header background change
+  // Scroll styling
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
@@ -57,24 +47,34 @@ function UserHeader() {
     }
   }, [dropdownOpen]);
 
+  // Body scroll lock for mobile drawer
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      const firstFocusable = drawerRef.current?.querySelector("a,button");
+      firstFocusable?.focus();
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [mobileMenuOpen]);
+
   const toggleDropdown = (e) => {
     e.stopPropagation();
-    setDropdownOpen(!dropdownOpen);
+    setDropdownOpen((v) => !v);
   };
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  const toggleMobileMenu = () => setMobileMenuOpen((v) => !v);
 
   const currentPath = location.pathname;
+  const isActiveRoute = (path) => currentPath === path;
 
   const navItems = [
     { path: "/user-home", label: "Dashboard", icon: Home },
     { path: "/user-dashboard", label: "Fleet", icon: Car },
     { path: "/my-booking", label: "Booking", icon: Book },
   ];
-
-  const isActiveRoute = (path) => currentPath === path;
 
   return (
     <>
@@ -84,62 +84,59 @@ function UserHeader() {
             ? "bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200/20"
             : "bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900"
         }`}
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
-              <div className="flex items-center group cursor-pointer">
-                <div className="relative flex-shrink-0">
-                  <img
-                    src={logo}
-                    alt="ISGA Holdings Logo"
-                    className="h-16 w-auto sm:h-12 sm:w-12 lg:h-16 lg:w-16 mr-2 sm:mr-4 transition-all duration-300 group-hover:opacity-90 group-hover:scale-105 shadow-lg rounded-lg"
-                  />
-                  <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse shadow-lg"></div>
-                </div>
-                <div className="ml-1 sm:ml-2 min-w-0">
-                  <h1
-                    className={`font-bold text-lg sm:text-2xl lg:text-3xl transition-all duration-300 truncate ${
-                      scrolled ? "text-gray-900" : "text-white"
-                    }`}
-                  >
-                    ISGA ENTERPRISE
-                  </h1>
-                  <p
-                    className={`text-sm sm:text-base lg:text-lg font-medium transition-all duration-300 truncate ${
-                      scrolled ? "text-gray-500" : "text-blue-200"
-                    }`}
-                  >
-                  
-                  </p>
-                </div>
+            <Link to="/user-home" className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              <div className="relative flex-shrink-0">
+                <img
+                  src={logo}
+                  alt="ISGA Logo"
+                  className="h-10 w-auto sm:h-12 lg:h-14 mr-1 sm:mr-2 transition-transform duration-300 hover:scale-105 rounded-lg"
+                />
+                <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse" />
               </div>
-            </div>
+              <div className="ml-1 sm:ml-2 min-w-0">
+                <h1
+                  className={`font-bold text-base sm:text-2xl lg:text-3xl truncate ${
+                    scrolled ? "text-gray-900" : "text-white"
+                  }`}
+                >
+                  ISGA ENTERPRISE
+                </h1>
+                <p className={`text-xs sm:text-sm font-medium truncate ${scrolled ? "text-gray-500" : "text-blue-200"}`}>
+                  {/* reserved for tagline if needed */}
+                </p>
+              </div>
+            </Link>
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
               <ul className="flex space-x-1 xl:space-x-2 items-center">
                 {navItems.map((item) => {
                   const Icon = item.icon;
+                  const active = isActiveRoute(item.path);
                   return (
                     <li key={item.path}>
                       <Link
                         to={item.path}
-                        className={`relative flex items-center space-x-2 xl:space-x-3 px-3 xl:px-6 py-2 xl:py-3 rounded-xl xl:rounded-2xl font-semibold text-sm xl:text-lg transition-all duration-300 group ${
-                          isActiveRoute(item.path)
+                        aria-current={active ? "page" : undefined}
+                        className={`relative flex items-center gap-2 px-4 xl:px-5 py-2.5 rounded-2xl font-semibold text-sm xl:text-base transition-all ${
+                          active
                             ? scrolled
-                              ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 shadow-lg border border-blue-100"
-                              : "bg-white/20 text-white shadow-xl backdrop-blur-sm border border-white/20"
+                              ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow border border-blue-100"
+                              : "bg-white/20 text-white shadow backdrop-blur-sm border border-white/20"
                             : scrolled
                             ? "text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50"
                             : "text-blue-100 hover:text-white hover:bg-white/10 hover:backdrop-blur-sm"
                         }`}
                       >
-                        <Icon size={18} className="xl:w-6 xl:h-6" />
-                        <span className="text-sm xl:text-lg">{item.label}</span>
-                        {isActiveRoute(item.path) && (
-                          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 xl:w-6 h-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full"></div>
+                        <Icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                        {active && (
+                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400" />
                         )}
                       </Link>
                     </li>
@@ -154,10 +151,9 @@ function UserHeader() {
               <div className="relative">
                 <button
                   onClick={toggleDropdown}
-                  className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-xl transition-all duration-300 ${
-                    scrolled
-                      ? "text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50"
-                      : "text-blue-100 hover:text-white hover:bg-white/10 hover:backdrop-blur-sm"
+                  aria-expanded={dropdownOpen}
+                  className={`flex items-center gap-2 p-2 sm:p-3 rounded-xl transition-colors ${
+                    scrolled ? "text-gray-700 hover:text-blue-700 hover:bg-gray-100" : "text-blue-100 hover:bg-white/10"
                   }`}
                 >
                   <div className="w-8 h-8 sm:w-11 sm:h-11 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -167,22 +163,22 @@ function UserHeader() {
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-3 w-56 sm:w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden z-50 animate-in slide-in-from-top-2 duration-300">
+                  <div className="absolute right-0 mt-3 w-60 sm:w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden z-50">
                     <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
                           <User size={18} className="text-white" />
                         </div>
-                        <div>
-                          <p className="font-bold text-lg text-gray-900 truncate">
-                            {user?.name || user?.fullName || user?.firstName || user?.username || 'User Name'}
+                        <div className="min-w-0">
+                          <p className="font-bold text-base sm:text-lg text-gray-900 truncate">
+                            {user?.name || user?.fullName || user?.firstName || user?.username || "User Name"}
                           </p>
-                          <p className="text-base text-gray-600 truncate">
-                            {user?.email || user?.emailAddress || 'user@email.com'}
+                          <p className="text-sm sm:text-base text-gray-600 truncate">
+                            {user?.email || user?.emailAddress || "user@email.com"}
                           </p>
-                          <div className="mt-2 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full inline-block">
+                          <span className="mt-2 inline-block px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">
                             Online
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -193,10 +189,10 @@ function UserHeader() {
                           setDropdownOpen(false);
                           navigate("/profile");
                         }}
-                        className="flex items-center space-x-4 px-6 py-4 text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 w-full text-left"
+                        className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-gray-50 w-full text-left"
                       >
-                        <User size={18} className="text-gray-500 group-hover:text-blue-600" />
-                        <span className="text-base">Account Settings</span>
+                        <User size={18} className="text-gray-500" />
+                        <span className="text-sm sm:text-base">Account Settings</span>
                       </button>
                       <button
                         onClick={() => {
@@ -205,68 +201,90 @@ function UserHeader() {
                             window.location.href = "/";
                           }
                         }}
-                        className="flex items-center space-x-4 px-6 py-4 text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 w-full text-left"
+                        className="flex items-center gap-3 px-5 py-3 text-red-600 hover:bg-red-50 w-full text-left"
                       >
                         <LogOut size={18} className="text-red-500" />
-                        <span className="text-base">Sign Out</span>
+                        <span className="text-sm sm:text-base">Sign Out</span>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
 
+              {/* Mobile menu button */}
               <button
                 onClick={toggleMobileMenu}
-                className={`lg:hidden p-2 rounded-xl transition-all duration-300 ${
-                  scrolled
-                    ? "text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50"
-                    : "text-blue-100 hover:text-white hover:bg-white/10 hover:backdrop-blur-sm"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="user-mobile-menu"
+                className={`lg:hidden p-2 rounded-xl transition-colors ${
+                  scrolled ? "text-gray-700 hover:text-blue-700 hover:bg-gray-100" : "text-blue-100 hover:bg-white/10"
                 }`}
               >
-                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Nav */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm"
-            onClick={toggleMobileMenu}
-          ></div>
-          <div className="fixed top-16 sm:top-20 left-0 right-0 bg-white/95 backdrop-blur-xl shadow-2xl border-t border-gray-200 max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)] overflow-y-auto">
-            <nav className="p-4 sm:p-6 space-y-3">
-              <ul className="flex flex-col space-y-3">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <li key={item.path}>
-                      <Link
-                        to={item.path}
-                        onClick={toggleMobileMenu}
-                        className={`flex items-center space-x-4 px-4 py-4 rounded-2xl text-lg transition-all duration-300 ${
-                          isActiveRoute(item.path)
-                            ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 shadow-lg border border-blue-100"
-                            : "text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50"
-                        }`}
-                      >
-                        <Icon size={20} />
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      )}
+      {/* Mobile Drawer */}
+      <div
+        id="user-mobile-menu"
+        ref={drawerRef}
+        className={`fixed inset-0 z-40 lg:hidden transition-transform duration-300 ${
+          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* Backdrop */}
+        <button
+          onClick={toggleMobileMenu}
+          className={`absolute inset-0 bg-black/40 ${
+            mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          } transition-opacity`}
+          aria-label="Close menu"
+        />
 
-      {/* Spacer for fixed header */}
-      <div className="h-16 sm:h-20"></div>
+        {/* Panel */}
+        <div className="absolute right-0 top-0 h-full w-[86%] sm:w-[70%] bg-white/95 backdrop-blur-xl shadow-2xl border-l border-gray-200 flex flex-col">
+          <div className="flex items-center justify-between px-4 py-4 border-b">
+            <span className="font-semibold text-gray-800">Menu</span>
+            <button onClick={toggleMobileMenu} className="p-2 rounded-lg hover:bg-gray-100" aria-label="Close menu">
+              <X size={20} />
+            </button>
+          </div>
+
+          <nav className="p-3 overflow-y-auto">
+            <ul className="flex flex-col gap-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActiveRoute(item.path);
+                return (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      onClick={toggleMobileMenu}
+                      className={`flex items-center gap-3 px-4 py-4 rounded-2xl text-base font-medium ${
+                        active
+                          ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100"
+                          : "text-gray-700 hover:text-blue-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+      </div>
+
+      {/* Spacer */}
+      <div className="h-16 sm:h-20" />
     </>
   );
 }
