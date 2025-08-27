@@ -8,38 +8,83 @@ require('dotenv').config();
 const ADMIN_CODE = 'isgaareyoufree';
 
 /* ================================
-   EMAIL TRANSPORTER (Strict Mode)
+   EMAIL TRANSPORTER WITH BETTER CONFIG
 ================================ */
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error("❌ EMAIL_USER or EMAIL_PASS environment variables not set");
+    throw new Error('EMAIL_USER or EMAIL_PASS environment variables not set');
   }
 
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Use STARTTLS
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+      pass: process.env.EMAIL_PASS,
     },
-    secure: true,
-    port: 465
+    connectionTimeout: 60000, // 60 seconds
+    greetingTimeout: 30000, // 30 seconds  
+    socketTimeout: 60000, // 60 seconds
+    pool: true, // Use connection pooling
+    maxConnections: 5,
+    maxMessages: 100,
+    rateLimit: 14, // Limit to 14 messages per second
+    tls: {
+      rejectUnauthorized: false
+    }
   });
 };
 
 let transporter;
 try {
   transporter = createTransporter();
-  console.log("✅ Mail transporter ready");
+  console.log('✅ Admin Mail transporter configured successfully');
+  
+  // Verify transporter configuration
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('❌ Admin SMTP verification failed:', error);
+    } else {
+      console.log('✅ Admin SMTP server is ready to take our messages');
+    }
+  });
 } catch (err) {
-  console.error("❌ Failed to init transporter:", err.message);
+  console.error('❌ Failed to configure admin mail transporter:', err.message);
+}
+
+/* ================================
+   SEND EMAIL WITH RETRY LOGIC
+================================ */
+async function sendEmailWithRetry(mailOptions, maxRetries = 3) {
+  if (!transporter) {
+    throw new Error('Email transporter not configured');
+  }
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await transporter.sendMail(mailOptions);
+      console.log(`📧 Admin email sent successfully on attempt ${attempt}`);
+      return result;
+    } catch (error) {
+      console.error(`❌ Admin email attempt ${attempt} failed:`, error.message);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      const waitTime = Math.pow(2, attempt) * 1000;
+      console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
 }
 
 /* ================================
    SEND CONFIRMATION EMAIL
 ================================ */
 async function sendConfirmationEmail(email, name) {
-  if (!transporter) throw new Error("❌ Email transporter not configured");
-
   const mailOptions = {
     from: `"ISGA ENTERPRISE" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -60,7 +105,7 @@ async function sendConfirmationEmail(email, name) {
           <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
         </div>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/admin-login"
+          <a href="${process.env.CLIENT_URL || 'https://isga-enterprise.vercel.app'}/admin-login"
              style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">
             Login to Admin Panel
           </a>
@@ -73,7 +118,7 @@ async function sendConfirmationEmail(email, name) {
     `
   };
 
-  return transporter.sendMail(mailOptions);
+  return sendEmailWithRetry(mailOptions);
 }
 
 /* ================================
@@ -98,12 +143,14 @@ exports.registerAdmin = async (req, res) => {
     const admin = new Admin({ name, userId, email, password: hashedPassword });
     await admin.save();
 
+    // Send email asynchronously (don't wait for it)
     sendConfirmationEmail(email, name)
-      .then(() => console.log(`📧 Confirmation email sent to ${email}`))
-      .catch(err => console.error("❌ Email sending failed:", err));
+      .then(() => console.log(`📧 Admin confirmation email sent to ${email}`))
+      .catch(err => console.error('❌ Admin email sending failed:', err.message));
 
     res.status(201).json({ message: 'Admin registered successfully' });
   } catch (error) {
+    console.error('Error registering admin:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -128,6 +175,7 @@ exports.loginAdmin = async (req, res) => {
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
+    console.error('Error during admin login:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -142,6 +190,7 @@ exports.getAdminDetails = async (req, res) => {
 
     res.json(admin);
   } catch (err) {
+    console.error('Error getting admin details:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -172,6 +221,7 @@ exports.updateAdmin = async (req, res) => {
 
     res.json(updatedAdmin);
   } catch (err) {
+    console.error('Error updating admin:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -207,14 +257,19 @@ exports.changeAdminPassword = async (req, res) => {
 };
 
 /* ================================
-   FORGOT ADMIN PASSWORD (PUBLIC)
+   FORGOT ADMIN PASSWORD WITH IMPROVED ERROR HANDLING
 ================================ */
 exports.forgotAdminPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
     const admin = await Admin.findOne({ email });
 
-    // Always respond success (avoid enumeration)
+    // Always respond success to avoid user enumeration
     if (!admin) {
       return res.json({ message: 'If that admin email exists, a reset link has been sent.' });
     }
@@ -226,23 +281,52 @@ exports.forgotAdminPassword = async (req, res) => {
     admin.resetPasswordExpires = Date.now() + 1000 * 60 * 60; // 1 hour
     await admin.save();
 
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/admin-reset-password/${rawToken}`;
+    const resetUrl = `${process.env.CLIENT_URL || 'https://isga-enterprise.vercel.app'}/admin-reset-password/${rawToken}`;
 
-    if (transporter) {
-      await transporter.sendMail({
-        from: `"ISGA ENTERPRISE" <${process.env.EMAIL_USER}>`,
-        to: admin.email,
-        subject: 'Reset your admin password',
-        html: `
-          <p>Hello ${admin.name || ''},</p>
-          <p>You requested a password reset for your admin account. Click the link below to set a new password:</p>
-          <p><a href="${resetUrl}">${resetUrl}</a></p>
-          <p>This link will expire in 1 hour. If you didn’t request this, you can ignore this email.</p>
-        `,
-      });
+    if (!transporter) {
+      console.error('❌ Email transporter not configured');
+      return res.json({ message: 'If that admin email exists, a reset link has been sent.' });
+    }
+
+    const mailOptions = {
+      from: `"ISGA ENTERPRISE" <${process.env.EMAIL_USER}>`,
+      to: admin.email,
+      subject: 'Reset your admin password - ISGA ENTERPRISE',
+      html: `
+        <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+          <h2 style="color: #333;">Admin Password Reset Request</h2>
+          <p>Hello ${admin.name || 'Admin'},</p>
+          <p>You requested a password reset for your ISGA ENTERPRISE admin account.</p>
+          <p>Click the button below to set a new password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" 
+               style="background-color: #dc3545; color: white; padding: 12px 30px; 
+                      text-decoration: none; border-radius: 5px; display: inline-block;">
+              Reset Admin Password
+            </a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; color: #666;">${resetUrl}</p>
+          <p><strong>This link will expire in 1 hour.</strong></p>
+          <p>If you didn't request this password reset, please contact support immediately.</p>
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          <p style="font-size: 12px; color: #666;">
+            This email was sent by ISGA ENTERPRISE Car Rental Service - Admin System.
+          </p>
+        </div>
+      `,
+    };
+
+    try {
+      await sendEmailWithRetry(mailOptions);
+      console.log(`📧 Admin password reset email sent to ${email}`);
+    } catch (emailError) {
+      console.error('❌ Failed to send admin password reset email:', emailError.message);
+      // Don't reveal email sending failure to avoid information disclosure
     }
 
     return res.json({ message: 'If that admin email exists, a reset link has been sent.' });
+    
   } catch (err) {
     console.error('forgotAdminPassword error:', err);
     return res.status(500).json({ message: 'Failed to start password reset' });
@@ -250,7 +334,7 @@ exports.forgotAdminPassword = async (req, res) => {
 };
 
 /* ================================
-   RESET ADMIN PASSWORD (PUBLIC)
+   RESET ADMIN PASSWORD
 ================================ */
 exports.resetAdminPassword = async (req, res) => {
   try {
@@ -259,6 +343,10 @@ exports.resetAdminPassword = async (req, res) => {
 
     if (!token || !password) {
       return res.status(400).json({ message: 'Invalid request' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
     }
 
     const hashed = crypto.createHash('sha256').update(token).digest('hex');
@@ -278,7 +366,9 @@ exports.resetAdminPassword = async (req, res) => {
 
     await admin.save();
 
+    console.log(`✅ Admin password reset successfully for: ${admin.email}`);
     return res.json({ message: 'Admin password has been reset successfully' });
+    
   } catch (err) {
     console.error('resetAdminPassword error:', err);
     return res.status(500).json({ message: 'Failed to reset password' });
@@ -295,6 +385,7 @@ exports.deleteAdmin = async (req, res) => {
 
     res.json({ message: 'Admin account deleted successfully' });
   } catch (err) {
+    console.error('Error deleting admin:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

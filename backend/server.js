@@ -10,7 +10,7 @@ require('dotenv').config();
 const bookingRoutes = require('./routes/Booking');
 const paymentRoutes = require('./routes/payment');
 const adminBookingRoutes = require('./routes/adminBooking');
-
+const bookingHistoryRoutes = require('./routes/bookingHistory');
 
 const app = express();
 app.use(express.json());
@@ -18,8 +18,6 @@ app.use(express.json());
 // ✅ CORS Configuration
 const allowedOrigins = [
     'http://localhost:5173', 
-    //'https://car-rental-website-p4r9.vercel.app'
-    //'https://car-rental-website-ci4p.vercel.app'
     'https://isga-enterprise.vercel.app'
 ];
 
@@ -58,6 +56,7 @@ app.use('/api/review', reviewRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminBookingRoutes);
+app.use('/api/booking-history', bookingHistoryRoutes);
 
 // ✅ Start the Server
 const PORT = process.env.PORT || 5000;

@@ -1,7 +1,8 @@
-// routes/bookings.js - Simple working version
+// routes/bookings.js - Updated with booking history functionality
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const BookingHistory = require('../models/BookingHistory'); // Add this import
 const Car = require('../models/car');
 const { sendBookingConfirmationEmail } = require('../utils/mailer');
 
@@ -151,6 +152,57 @@ router.put('/confirm/:id', async (req, res) => {
   }
 });
 
+// 🆕 NEW: Finish booking - Move to history and delete from active bookings
+router.post('/:id/finish', async (req, res) => {
+  try {
+    // Find the booking to finish
+    const booking = await Booking.findById(req.params.id).populate('car');
+    
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    console.log(`Finishing booking ${booking._id} for car ${booking.car?.model}`);
+
+    // Create history record with only required fields
+    const historyData = {
+      bookingId: booking._id,
+      car: booking.car._id,
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone,
+      altPhone: booking.altPhone,
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      withDriver: booking.withDriver || false,
+      weddingPurpose: booking.weddingPurpose || false,
+      totalAmount: booking.totalAmount,
+      completedAt: new Date()
+    };
+
+    // Save to booking history
+    const history = new BookingHistory(historyData);
+    await history.save();
+    console.log(`Booking moved to history with ID: ${history._id}`);
+
+    // Delete the original booking
+    await Booking.findByIdAndDelete(req.params.id);
+    console.log(`Original booking ${booking._id} deleted from active bookings`);
+
+    res.json({ 
+      message: 'Booking finished successfully and moved to history',
+      historyId: history._id
+    });
+    
+  } catch (error) {
+    console.error('Error finishing booking:', error);
+    res.status(500).json({ 
+      message: 'Server error while finishing booking',
+      error: error.message 
+    });
+  }
+});
+
 // ✅ GET bookings for a specific car (only confirmed)
 router.get("/car/:carId", async (req, res) => {
   try {
@@ -275,7 +327,7 @@ router.post('/:id/add-payment', async (req, res) => {
   }
 });
 
-// ✅ Delete booking
+// ✅ Delete booking - Updated to handle both scenarios
 router.delete('/:id', async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
@@ -283,24 +335,44 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    // If booking has payments, mark as cancelled instead of deleting
-    if (booking.paidAmount > 0) {
-      booking.status = 'cancelled';
-      booking.updatedAt = new Date();
-      await booking.save();
-      
-      res.json({ 
-        message: 'Booking cancelled successfully (payment record preserved)',
-        booking 
-      });
-    } else {
-      // If no payments, safe to delete
-      await Booking.findByIdAndDelete(req.params.id);
-      res.json({ message: 'Booking deleted successfully' });
-    }
+    console.log(`Deleting booking ${booking._id} permanently`);
+
+    // Delete booking permanently (no history record)
+    await Booking.findByIdAndDelete(req.params.id);
+    
+    console.log(`Booking ${req.params.id} deleted permanently`);
+    res.json({ message: 'Booking deleted successfully' });
+    
   } catch (error) {
     console.error('Error deleting booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ 
+      message: 'Server error while deleting booking',
+      error: error.message 
+    });
+  }
+});
+
+// 🆕 NEW: Update existing booking (for admin edits)
+router.put('/:id', async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    ).populate('car');
+    
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    
+    console.log(`Booking ${booking._id} updated successfully`);
+    res.json(booking);
+  } catch (error) {
+    console.error('Error updating booking:', error);
+    res.status(500).json({ 
+      message: 'Error updating booking',
+      error: error.message 
+    });
   }
 });
 

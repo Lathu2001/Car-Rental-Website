@@ -6,7 +6,7 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 /* ================================
-   EMAIL TRANSPORTER
+   EMAIL TRANSPORTER WITH BETTER CONFIG
 ================================ */
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -14,13 +14,23 @@ const createTransporter = () => {
   }
 
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Use STARTTLS
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    secure: true,
-    port: 465,
+    connectionTimeout: 60000, // 60 seconds
+    greetingTimeout: 30000, // 30 seconds  
+    socketTimeout: 60000, // 60 seconds
+    pool: true, // Use connection pooling
+    maxConnections: 5,
+    maxMessages: 100,
+    rateLimit: 14, // Limit to 14 messages per second
+    tls: {
+      rejectUnauthorized: false
+    }
   });
 };
 
@@ -28,16 +38,51 @@ let transporter;
 try {
   transporter = createTransporter();
   console.log('✅ Mail transporter configured successfully');
+  
+  // Verify transporter configuration
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('❌ SMTP verification failed:', error);
+    } else {
+      console.log('✅ SMTP server is ready to take our messages');
+    }
+  });
 } catch (err) {
   console.error('❌ Failed to configure mail transporter:', err.message);
+}
+
+/* ================================
+   SEND EMAIL WITH RETRY LOGIC
+================================ */
+async function sendEmailWithRetry(mailOptions, maxRetries = 3) {
+  if (!transporter) {
+    throw new Error('Email transporter not configured');
+  }
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await transporter.sendMail(mailOptions);
+      console.log(`📧 Email sent successfully on attempt ${attempt}`);
+      return result;
+    } catch (error) {
+      console.error(`❌ Email attempt ${attempt} failed:`, error.message);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      const waitTime = Math.pow(2, attempt) * 1000;
+      console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
 }
 
 /* ================================
    SEND USER CONFIRMATION EMAIL
 ================================ */
 async function sendUserConfirmationEmail(email, name) {
-  if (!transporter) throw new Error('Email transporter not configured');
-
   const mailOptions = {
     from: `"ISGA ENTERPRISE" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -47,11 +92,11 @@ async function sendUserConfirmationEmail(email, name) {
       <p>Your account has been successfully created.</p>
       <p><b>Email:</b> ${email}</p>
       <p><b>Registration Date:</b> ${new Date().toLocaleDateString()}</p>
-      <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/login">Login Here</a>
+      <a href="${process.env.CLIENT_URL || 'https://isga-enterprise.vercel.app'}/login">Login Here</a>
     `,
   };
 
-  return transporter.sendMail(mailOptions);
+  return sendEmailWithRetry(mailOptions);
 }
 
 /* ================================
@@ -81,9 +126,10 @@ exports.registerUser = async (req, res) => {
 
     await user.save();
 
+    // Send email asynchronously (don't wait for it)
     sendUserConfirmationEmail(email, name)
       .then(() => console.log(`📧 Confirmation email sent to ${email}`))
-      .catch((err) => console.error('❌ Email sending failed:', err));
+      .catch((err) => console.error('❌ Email sending failed:', err.message));
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
@@ -119,11 +165,16 @@ exports.loginUser = async (req, res) => {
 };
 
 /* ================================
-   FORGOT PASSWORD
+   FORGOT PASSWORD WITH IMPROVED ERROR HANDLING
 ================================ */
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body; // expect { email }
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
     const user = await User.findOne({ email });
 
     // Always respond success to avoid user enumeration
@@ -138,26 +189,52 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 1000 * 60 * 60; // 1 hour
     await user.save();
 
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${rawToken}`;
+    const resetUrl = `${process.env.CLIENT_URL || 'https://isga-enterprise.vercel.app'}/reset-password/${rawToken}`;
 
     if (!transporter) {
       console.error('❌ Email transporter not configured');
       return res.json({ message: 'If that email exists, a reset link has been sent.' });
     }
 
-    await transporter.sendMail({
+    const mailOptions = {
       from: `"ISGA ENTERPRISE" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: 'Reset your password',
+      subject: 'Reset your password - ISGA ENTERPRISE',
       html: `
-        <p>Hello ${user.name || ''},</p>
-        <p>You requested a password reset. Click the link below to set a new password:</p>
-        <p><a href="${resetUrl}">${resetUrl}</a></p>
-        <p>This link will expire in 1 hour. If you didn’t request this, you can ignore this email.</p>
+        <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+          <h2 style="color: #333;">Password Reset Request</h2>
+          <p>Hello ${user.name || 'User'},</p>
+          <p>You requested a password reset for your ISGA ENTERPRISE account.</p>
+          <p>Click the button below to set a new password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" 
+               style="background-color: #007bff; color: white; padding: 12px 30px; 
+                      text-decoration: none; border-radius: 5px; display: inline-block;">
+              Reset Password
+            </a>
+          </div>
+          <p>Or copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; color: #666;">${resetUrl}</p>
+          <p><strong>This link will expire in 1 hour.</strong></p>
+          <p>If you didn't request this password reset, you can safely ignore this email.</p>
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          <p style="font-size: 12px; color: #666;">
+            This email was sent by ISGA ENTERPRISE Car Rental Service.
+          </p>
+        </div>
       `,
-    });
+    };
+
+    try {
+      await sendEmailWithRetry(mailOptions);
+      console.log(`📧 Password reset email sent to ${email}`);
+    } catch (emailError) {
+      console.error('❌ Failed to send password reset email:', emailError.message);
+      // Don't reveal email sending failure to avoid information disclosure
+    }
 
     return res.json({ message: 'If that email exists, a reset link has been sent.' });
+    
   } catch (err) {
     console.error('forgotPassword error:', err);
     return res.status(500).json({ message: 'Failed to start password reset' });
@@ -174,6 +251,10 @@ exports.resetPassword = async (req, res) => {
 
     if (!token || !password) {
       return res.status(400).json({ message: 'Invalid request' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
@@ -193,7 +274,9 @@ exports.resetPassword = async (req, res) => {
 
     await user.save();
 
+    console.log(`✅ Password reset successfully for user: ${user.email}`);
     return res.json({ message: 'Password has been reset successfully' });
+    
   } catch (err) {
     console.error('resetPassword error:', err);
     return res.status(500).json({ message: 'Failed to reset password' });

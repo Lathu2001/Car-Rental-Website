@@ -10,7 +10,13 @@ const UserSchema = new mongoose.Schema(
     NICNumber: { type: String },
     phoneNumber: { type: String },
     password: { type: String, required: true },
-
+    
+    // Email verification fields
+    isVerified: { type: Boolean, default: false },
+    otp: { type: String },
+    otpExpiry: { type: Date },
+    otpAttempts: { type: Number, default: 0 },
+    
     // Password reset fields
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
