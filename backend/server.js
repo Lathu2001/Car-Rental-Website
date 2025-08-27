@@ -10,28 +10,16 @@ require('dotenv').config();
 const bookingRoutes = require('./routes/Booking');
 const paymentRoutes = require('./routes/payment');
 const adminBookingRoutes = require('./routes/adminBooking');
-const bookingHistoryRoutes = require('./routes/bookingHistory');
+
 
 const app = express();
 app.use(express.json());
 
-// ✅ CORS Configuration
-const allowedOrigins = [
-    'http://localhost:5173', 
-    'https://isga-enterprise.vercel.app'
-];
+
 
 app.use(cors({
-
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+  origin: ['http://localhost:5173', 'https://isga-enterprise.vercel.app'], // Add your frontend URLs
+  credentials: true
 }));
 
 // ✅ MongoDB Connection
@@ -56,7 +44,6 @@ app.use('/api/review', reviewRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminBookingRoutes);
-app.use('/api/booking-history', bookingHistoryRoutes);
 
 // ✅ Start the Server
 const PORT = process.env.PORT || 5000;
