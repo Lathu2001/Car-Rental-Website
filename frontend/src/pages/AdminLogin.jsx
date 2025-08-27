@@ -1,8 +1,10 @@
-// src/pages/AdminLogin.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Shield, ArrowRight, Sparkles } from 'lucide-react';
+import {
+  Eye, EyeOff, Mail, Lock, Shield, ArrowRight, Sparkles,
+  CheckCircle2, XCircle, Info
+} from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
 const AdminLogin = () => {
@@ -16,22 +18,37 @@ const AdminLogin = () => {
   const [fpEmail, setFpEmail] = useState('');
   const [fpLoading, setFpLoading] = useState(false);
 
+  // Toast state (non-blocking)
+  const [toast, setToast] = useState({ show: false, type: 'info', message: '' });
+  const toastTimerRef = useRef(null);
+
   const navigate = useNavigate();
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { setMounted(true); return () => clearTimeout(toastTimerRef.current); }, []);
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const showToast = (message, type = 'info', duration = 1600) => {
+    setToast({ show: true, type, message });
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
+      setToast(t => ({ ...t, show: false }));
+    }, duration);
+  };
+
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_BASE_URL}/api/admin/login`, formData);
-      alert('Login successful');
       localStorage.setItem('adminToken', response.data.token);
-      navigate('/admin-dashboard');
+
+      // Non-blocking success toast then proceed
+      showToast('Login successful. Redirecting…', 'success', 900);
+      setTimeout(() => navigate('/admin-dashboard'), 800);
     } catch (error) {
-      alert(error?.response?.data?.message || 'Login failed');
+      showToast(error?.response?.data?.message || 'Login failed. Please try again.', 'error', 2200);
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +66,7 @@ const AdminLogin = () => {
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
     if (!fpEmail || !fpEmail.includes('@')) {
-      alert('Enter a valid admin email to receive the reset link.');
+      showToast('Enter a valid admin email to receive the reset link.', 'info', 2200);
       return;
     }
     setFpLoading(true);
@@ -57,16 +74,43 @@ const AdminLogin = () => {
       await axios.post(`${API_BASE_URL}/api/admin/forgot-password`, { email: fpEmail }, {
         headers: { 'Content-Type': 'application/json' },
       });
-      alert('If that admin email exists, a reset link has been sent.');
-      closeForgot();
+      showToast('If that admin email exists, a reset link has been sent.', 'success', 2000);
+      setTimeout(closeForgot, 800);
     } catch (err) {
-      alert(err?.response?.data?.message || 'Could not start password reset. Try again later.');
+      showToast(err?.response?.data?.message || 'Could not start password reset. Try again later.', 'error', 2400);
       setFpLoading(false);
     }
   };
 
+  // Simple toast component (no OK button)
+  const Toast = ({ type, message }) => {
+    const styles = {
+      success: 'bg-green-600/90 text-white',
+      error: 'bg-red-600/90 text-white',
+      info: 'bg-slate-800/90 text-white',
+    }[type || 'info'];
+
+    const Icon = type === 'success' ? CheckCircle2 : type === 'error' ? XCircle : Info;
+
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-[70]"
+      >
+        <div className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl backdrop-blur ${styles}`}>
+          <Icon className="w-5 h-5" />
+          <span className="text-sm font-medium">{message}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Toast (non-blocking) */}
+      {toast.show && <Toast type={toast.type} message={toast.message} />}
+
       {/* Background Car Images */}
       <div className="absolute inset-0 overflow-hidden">
         <div
@@ -277,8 +321,6 @@ const AdminLogin = () => {
               >
                 {fpLoading ? 'Sending…' : 'Send reset link'}
               </button>
-
-              
             </form>
           </div>
         </div>

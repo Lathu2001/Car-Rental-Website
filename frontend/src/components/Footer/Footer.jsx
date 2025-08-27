@@ -27,11 +27,11 @@ const Footer = () => {
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        {/* Main */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 mb-10 lg:mb-12">
+        {/* Main (equal-height cards) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-stretch mb-10 lg:mb-12">
           {/* About */}
           <section className="lg:col-span-6 group">
-            <div className="backdrop-blur-sm bg-white/5 rounded-2xl p-5 sm:p-6 border border-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/10 hover:ring-1 hover:ring-white/20">
+            <div className="h-full min-h-[360px] lg:min-h-[380px] flex flex-col backdrop-blur-sm bg-white/5 rounded-2xl p-5 sm:p-6 border border-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/10 hover:ring-1 hover:ring-white/20">
               <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent flex items-center gap-2">
                 About Us
                 <span className="w-2 h-2 bg-blue-400 rounded-full animate-ping motion-reduce:animate-none" />
@@ -42,12 +42,13 @@ const Footer = () => {
                 With years of experience in the industry, we take pride in providing top-notch service. At <span className="font-semibold">ISGA ENTERPRISE</span>,
                 customer satisfaction is our top priority. Whether you need a car for a few hours, a day, or an extended period, our flexible rental plans are designed to suit your schedule and budget.
               </p>
+              <div className="mt-auto" />
             </div>
           </section>
 
           {/* Quick Links */}
           <nav aria-label="Quick links" className="lg:col-span-3 group">
-            <div className="backdrop-blur-sm bg-white/5 rounded-2xl p-5 sm:p-6 border border-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/10 hover:ring-1 hover:ring-white/20 h-full">
+            <div className="h-full min-h-[360px] lg:min-h-[380px] flex flex-col backdrop-blur-sm bg-white/5 rounded-2xl p-5 sm:p-6 border border-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/10 hover:ring-1 hover:ring-white/20">
               <h3 className="text-lg sm:text-xl font-bold mb-5 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 Quick Links
               </h3>
@@ -65,12 +66,13 @@ const Footer = () => {
                   </Link>
                 </li>
               </ul>
+              <div className="mt-auto" />
             </div>
           </nav>
 
           {/* Contact */}
           <section aria-label="Head office" className="lg:col-span-3 group">
-            <div className="backdrop-blur-sm bg-white/5 rounded-2xl p-5 sm:p-6 border border-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/10 hover:ring-1 hover:ring-white/20 h-full">
+            <div className="h-full min-h-[360px] lg:min-h-[380px] flex flex-col backdrop-blur-sm bg-white/5 rounded-2xl p-5 sm:p-6 border border-white/10 transition-all duration-200 hover:-translate-y-1 hover:bg-white/10 hover:ring-1 hover:ring-white/20">
               <h3 className="text-lg sm:text-xl font-bold mb-5 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 Head Office
               </h3>
@@ -110,6 +112,7 @@ const Footer = () => {
                   </div>
                 </div>
               </div>
+              <div className="mt-auto" />
             </div>
           </section>
         </div>
@@ -135,7 +138,7 @@ const Footer = () => {
           </div>
         </section>
 
-        {/* Bottom (fixed border class) */}
+        {/* Bottom */}
         <div className="border-t border-white/20 pt-6 lg:pt-8">
           <div className="text-center">
             <div className="inline-block backdrop-blur-sm bg-white/5 rounded-full px-5 sm:px-6 py-2.5 sm:py-3 border border-white/10">
