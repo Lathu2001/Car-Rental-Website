@@ -36,6 +36,7 @@ import {
   AlertTriangle,
   XCircle
 } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 function AdminBookings() {
   const [bookings, setBookings] = useState([]);
@@ -56,7 +57,7 @@ function AdminBookings() {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/bookings');
+      const res = await axios.get(`${API_BASE_URL}/api/bookings`);
       
       const enhancedBookings = res.data.map(booking => ({
         ...booking,
@@ -82,7 +83,7 @@ function AdminBookings() {
     
     setHistoryLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/booking-history');
+      const res = await axios.get(`${API_BASE_URL}/api/booking-history`);
       setBookingHistory(res.data);
     } catch (error) {
       console.error('Error fetching booking history:', error);
@@ -105,7 +106,7 @@ function AdminBookings() {
       confirmText: 'Finish Booking',
       action: async () => {
         try {
-          await axios.post(`http://localhost:5000/api/bookings/${id}/finish`);
+          await axios.post(`${API_BASE_URL}/api/bookings/${id}/finish`);
           setBookings(prev => prev.filter(b => b._id !== id));
           setBookingHistory([]);
           showNotification('Booking finished and moved to history!', 'success');
@@ -127,7 +128,7 @@ function AdminBookings() {
       confirmText: 'Delete Booking',
       action: async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/bookings/${id}`);
+          await axios.delete(`${API_BASE_URL}/api/bookings/${id}`);
           setBookings(prev => prev.filter(b => b._id !== id));
           showNotification('Booking deleted successfully!', 'success');
         } catch (error) {
@@ -156,7 +157,7 @@ function AdminBookings() {
       action: async () => {
         try {
           const deletePromises = cancelledBookings.map(booking => 
-            axios.delete(`http://localhost:5000/api/bookings/${booking._id}`)
+            axios.delete(`${API_BASE_URL}/api/bookings/${booking._id}`)
           );
           
           await Promise.all(deletePromises);
@@ -188,7 +189,7 @@ function AdminBookings() {
       action: async () => {
         try {
           const deletePromises = pendingBookings.map(booking => 
-            axios.delete(`http://localhost:5000/api/bookings/${booking._id}`)
+            axios.delete(`${API_BASE_URL}/api/bookings/${booking._id}`)
           );
           
           await Promise.all(deletePromises);
@@ -242,7 +243,7 @@ function AdminBookings() {
       action: async () => {
         try {
           const deletePromises = historyToDelete.map(booking => 
-            axios.delete(`http://localhost:5000/api/booking-history/${booking._id}`)
+            axios.delete(`${API_BASE_URL}/api/booking-history/${booking._id}`)
           );
           
           await Promise.all(deletePromises);
