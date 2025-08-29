@@ -1,420 +1,289 @@
-// src/pages/Login.jsx
-import { useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from "lucide-react"; // 👈 added
+import { User, Edit3, Trash2, Mail, MapPin, Phone, CreditCard, Home, LogOut } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
-export default function Login() {
-    const [formData, setFormData] = useState({
-        identifier: "",
-        password: "",
-    });
-    const [isLoading, setIsLoading] = useState(false);
-    const [focusedField, setFocusedField] = useState("");
-    const [notification, setNotification] = useState({ message: "", type: "", show: false });
-    const [errors, setErrors] = useState({});
-
-    // 👇 show/hide password state
-    const [showPassword, setShowPassword] = useState(false);
-
-    // Forgot password modal state
-    const [showForgot, setShowForgot] = useState(false);
-    const [fpEmail, setFpEmail] = useState("");
-    const [fpLoading, setFpLoading] = useState(false);
-
+export default function UserDashboard() {
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const navigate = useNavigate();
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-        
-        // Clear field-specific error when user starts typing
-        if (errors[name]) {
-            setErrors({ ...errors, [name]: "" });
-        }
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-
-        // Email validation (your API accepts identifier; here we enforce email format as your UI suggests)
-        if (!formData.identifier) {
-            newErrors.identifier = "Email is required";
-        } else if (!formData.identifier.includes('@')) {
-            newErrors.identifier = "Please enter a valid email address";
-        }
-
-        // Password validation
-        if (!formData.password) {
-            newErrors.password = "Password is required";
-        } else if (formData.password.length < 6) {
-            newErrors.password = "Password must be at least 6 characters";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const showNotification = (message, type = "error") => {
-        setNotification({ message, type, show: true });
-        // Auto-hide notification after 5 seconds
-        setTimeout(() => {
-            setNotification({ message: "", type: "", show: false });
-        }, 5000);
-    };
-
-    const handleSignIn = async (e) => {
-        e.preventDefault();
-        
-        // Validate form before submitting
-        if (!validateForm()) {
-            showNotification("Please fix the errors below", "error");
+    useEffect(() => {
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
             return;
         }
 
-        setIsLoading(true);
-        
-        try {
-            const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData, {
-                timeout: 10000, // 10 second timeout
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-                     
-            const { token, user } = response.data;
-            
-            if (!token || !user) {
-                throw new Error("Invalid response from server");
+        axios.get(`${API_BASE_URL}/api/users/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-                      
-            // Store user data securely (sessionStorage per your dashboard)
-            sessionStorage.setItem("token", token);
-            sessionStorage.setItem("userId", user.id);
-            sessionStorage.setItem("username", user.name || user.username || "User");
-            sessionStorage.setItem("userEmail", user.email);
-                 
-            showNotification("Welcome! Login successful. Redirecting...", "success");
-            
-            // Redirect after showing success message
-            setTimeout(() => {
-                navigate('/user-dashboard');
-            }, 1000);
-            
-        } catch (error) {
-            console.error('Login error:', error);
-            
-            let errorMessage = "Login failed. Please try again.";
-            
-            if (error.code === 'ECONNABORTED') {
-                errorMessage = "Request timeout. Please check your internet connection.";
-            } else if (error.response) {
-                // Server responded with error status
-                const status = error.response.status;
-                const serverMessage = error.response.data?.message;
-                
-                switch (status) {
-                    case 400:
-                        errorMessage = serverMessage || "Invalid email or password";
-                        break;
-                    case 401:
-                        errorMessage = "Invalid credentials. Please check your email and password.";
-                        break;
-                    case 404:
-                        errorMessage = "Account not found. Please check your email or register.";
-                        break;
-                    case 429:
-                        errorMessage = "Too many login attempts. Please try again later.";
-                        break;
-                    case 500:
-                        errorMessage = "Server error. Please try again later.";
-                        break;
-                    default:
-                        errorMessage = serverMessage || `Error ${status}: Please try again.`;
-                }
-            } else if (error.request) {
-                // Request was made but no response received
-                errorMessage = "Unable to connect to server. Please check your internet connection.";
-            }
-            
-            showNotification(errorMessage, "error");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        })
+        .then(res => setUser(res.data))
+        .catch(err => {
+            console.error("❌ Error fetching user details:", err);
+            setError("Failed to fetch user details. Please log in again.");
+            sessionStorage.clear();
+            navigate('/login');
+        });
+    }, [navigate]);
 
-    const closeNotification = () => {
-        setNotification({ message: "", type: "", show: false });
-    };
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm("Are you sure you want to delete your account?");
+        if (!confirmDelete) return;
 
-    // Forgot password handlers
-    const openForgot = () => {
-        setFpEmail(formData.identifier || "");
-        setShowForgot(true);
-    };
-
-    const closeForgot = () => {
-        setShowForgot(false);
-        setFpLoading(false);
-    };
-
-    const handleForgotSubmit = async (e) => {
-        e.preventDefault();
-
-        // Simple email check to match your login validation
-        if (!fpEmail || !fpEmail.includes('@')) {
-            showNotification("Enter a valid email to receive the reset link.", "error");
-            return;
-        }
-
-        setFpLoading(true);
+        setIsDeleting(true);
         try {
-            await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, { email: fpEmail }, {
-                headers: { 'Content-Type': 'application/json' }
+            const token = sessionStorage.getItem('token');
+            await axios.delete(`${API_BASE_URL}/api/users/delete`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
-            showNotification("If that email exists, a reset link has been sent.", "success");
-            closeForgot();
+
+            sessionStorage.clear();
+            alert("Account deleted successfully.");
+            navigate('/register');
         } catch (err) {
-            console.error('Forgot password error:', err);
-            showNotification(
-                err?.response?.data?.message || "Could not start password reset. Try again later.",
-                "error"
-            );
-            setFpLoading(false);
+            console.error("❌ Error deleting account:", err);
+            alert("Failed to delete account.");
+        } finally {
+            setIsDeleting(false);
         }
     };
+
+    const goToEditPage = () => {
+        navigate('/edit-user-account');
+    };
+
+    const handleLogout = () => {
+        sessionStorage.clear();
+        navigate('/login');
+    };
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+                <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-red-200">
+                    <div className="text-red-600 text-center">
+                        <div className="text-4xl mb-4">⚠️</div>
+                        <p className="text-lg font-medium">{error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center relative overflow-hidden">
+                {/* Animated Background Elements */}
+                <div className="absolute inset-0">
+                    <div className="absolute top-20 left-20 w-72 h-72 bg-blue-300/30 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+                    <div className="absolute top-40 right-20 w-96 h-96 bg-purple-300/30 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-300"></div>
+                    <div className="absolute bottom-20 left-40 w-80 h-80 bg-pink-300/30 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
+                </div>
+                
+                <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/20 z-10">
+                    <div className="flex items-center justify-center space-x-3">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                        <p className="text-lg font-medium text-gray-700">Loading user details...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div
-            className="flex items-center justify-center min-h-screen bg-cover bg-center relative overflow-hidden"
-            style={{ 
-                backgroundImage: "url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"
-            }}
-        >
-            {/* Animated overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-purple-900/50 to-black/80"></div>
-            
-            {/* Floating particles */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white/20 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
-                <div className="absolute top-1/3 right-1/4 w-1 h-1 bg-blue-300/30 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
-                <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-purple-300/15 rounded-full animate-bounce" style={{animationDelay: '2s'}}></div>
-                <div className="absolute top-1/2 right-1/3 w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce" style={{animationDelay: '3s'}}></div>
-            </div>
-
-            {/* Notification Toast */}
-            {notification.show && (
-                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border-l-4 flex items-center justify-between max-w-md transform transition-all duration-300 ${
-                    notification.type === 'success' 
-                        ? 'bg-green-50 border-green-500 text-green-700' 
-                        : 'bg-red-50 border-red-500 text-red-700'
-                }`}>
-                    <div className="flex items-center">
-                        <div className={`w-5 h-5 rounded-full mr-3 flex items-center justify-center ${
-                            notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                        }`}>
-                            {notification.type === 'success' ? (
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                            ) : (
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                </svg>
-                            )}
-                        </div>
-                        <span className="text-sm font-medium">{notification.message}</span>
-                    </div>
-                    <button 
-                        onClick={closeNotification}
-                        className="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none"
-                    >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            )}
-
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 relative z-10 transform transition-all duration-500 hover:scale-105 border border-white/20">
-                {/* Glowing border effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-sm animate-pulse"></div>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+            {/* Animated Background Elements */}
+            <div className="absolute inset-0">
+                {/* Floating Orbs */}
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-300/30 to-purple-300/30 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+                <div className="absolute top-3/4 right-1/4 w-80 h-80 bg-gradient-to-r from-cyan-300/30 to-indigo-300/30 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-300"></div>
+                <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-gradient-to-r from-emerald-300/30 to-teal-300/30 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
                 
-                <div className="text-center mb-8 relative z-10">
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-2">
-                        Welcome Back
-                    </h2>
-                    <p className="text-gray-600">Sign in to your vehicle rental account</p>
-                </div>
+                {/* Animated Grid */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/20 to-transparent bg-[length:100px_100px] opacity-30 animate-pulse"></div>
+                
+                {/* Floating Particles */}
+                {[...Array(20)].map((_, i) => (
+                    <div
+                        key={i}
+                        className="absolute w-2 h-2 bg-blue-400/40 rounded-full animate-bounce"
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                            animationDelay: `${Math.random() * 2}s`,
+                            animationDuration: `${2 + Math.random() * 2}s`
+                        }}
+                    />
+                ))}
+            </div>
 
-                <form onSubmit={handleSignIn} className="space-y-6 relative z-10">
-                    <div className="relative">
-                        <input
-                            name="identifier"
-                            type="email"
-                            value={formData.identifier}
-                            onChange={handleInputChange}
-                            onFocus={() => setFocusedField("identifier")}
-                            onBlur={() => setFocusedField("")}
-                            placeholder="Email"
-                            aria-label="Email address"
-                            aria-invalid={errors.identifier ? 'true' : 'false'}
-                            aria-describedby={errors.identifier ? 'identifier-error' : undefined}
-                            required
-                            className={`w-full p-4 rounded-xl border-2 transition-all duration-300 bg-white/80 backdrop-blur-sm
-                                ${errors.identifier 
-                                    ? "border-red-500 shadow-lg shadow-red-500/20" 
-                                    : focusedField === "identifier" 
-                                        ? "border-blue-500 shadow-lg shadow-blue-500/20 bg-white" 
-                                        : "border-gray-200 hover:border-gray-300"
-                                }
-                                focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                        />
-                        <div className={`absolute left-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 rounded-full ${
-                            focusedField === "identifier" ? "w-full" : "w-0"
-                        }`}></div>
-                        {errors.identifier && (
-                            <p id="identifier-error" className="text-red-500 text-xs mt-1 ml-2">{errors.identifier}</p>
-                        )}
+            {/* Main Content */}
+            <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+                <div className="w-full max-w-4xl">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-4 shadow-2xl">
+                            <User className="w-10 h-10 text-white" />
+                        </div>
+                        <h1 className="text-4xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            Welcome Back!
+                        </h1>
+                        <p className="text-gray-600 text-lg">Manage your account with style</p>
                     </div>
 
-                    <div className="relative">
-                        <input
-                            name="password"
-                            type={showPassword ? "text" : "password"} // 👈 toggled type
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            onFocus={() => setFocusedField("password")}
-                            onBlur={() => setFocusedField("")}
-                            placeholder="Password"
-                            aria-label="Password"
-                            aria-invalid={errors.password ? 'true' : 'false'}
-                            aria-describedby={errors.password ? 'password-error' : undefined}
-                            required
-                            className={`w-full p-4 pr-12 rounded-xl border-2 transition-all duration-300 bg-white/80 backdrop-blur-sm // 👈 pr-12 for icon space
-                                ${errors.password 
-                                    ? "border-red-500 shadow-lg shadow-red-500/20" 
-                                    : focusedField === "password" 
-                                        ? "border-blue-500 shadow-lg shadow-blue-500/20 bg-white" 
-                                        : "border-gray-200 hover:border-gray-300"
-                                }
-                                focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                        />
-                        {/* toggle button */}
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(v => !v)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            aria-pressed={showPassword}
-                            className="absolute inset-y-0 right-3 flex items-center justify-center p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                        >
-                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
+                    {/* Dashboard Card */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/40 overflow-hidden">
+                        {/* Header Section */}
+                        <div className="bg-gradient-to-r from-purple-100/80 to-pink-100/80 p-8 border-b border-gray-200/50">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-1">User Dashboard</h2>
+                                    <p className="text-gray-600">Your personal information</p>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 rounded-xl transition-all duration-300 border border-red-200 hover:scale-105"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        </div>
 
-                        <div className={`absolute left-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 rounded-full ${
-                            focusedField === "password" ? "w-full" : "w-0"
-                        }`}></div>
-                        {errors.password && (
-                            <p id="password-error" className="text-red-500 text-xs mt-1 ml-2">{errors.password}</p>
-                        )}
-                        {/* Forgot link */}
-                        <div className="mt-2 text-right">
-                            <button
-                                type="button"
-                                onClick={openForgot}
-                                className="text-sm text-blue-600 hover:text-purple-600 underline decoration-2 underline-offset-4 transition-colors"
-                            >
-                                Forgot password?
-                            </button>
+                        {/* User Info Grid */}
+                        <div className="p-8">
+                            <div className="grid md:grid-cols-2 gap-6 mb-8">
+                                {/* Personal Info */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center space-x-3 p-4 bg-white/60 rounded-xl border border-gray-200/50 hover:bg-white/80 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
+                                            <User className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Full Name</p>
+                                            <p className="text-gray-800 font-semibold">{user.name}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center space-x-3 p-4 bg-white/60 rounded-xl border border-gray-200/50 hover:bg-white/80 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg flex items-center justify-center shadow-lg">
+                                            <User className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Username</p>
+                                            <p className="text-gray-800 font-semibold">{user.username}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center space-x-3 p-4 bg-white/60 rounded-xl border border-gray-200/50 hover:bg-white/80 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg flex items-center justify-center shadow-lg">
+                                            <Mail className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Email Address</p>
+                                            <p className="text-gray-800 font-semibold">{user.email}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center space-x-3 p-4 bg-white/60 rounded-xl border border-gray-200/50 hover:bg-white/80 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-lg">
+                                            <Phone className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Phone Number</p>
+                                            <p className="text-gray-800 font-semibold">{user.phoneNumber || 'Not provided'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Location & Additional Info */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center space-x-3 p-4 bg-white/60 rounded-xl border border-gray-200/50 hover:bg-white/80 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg flex items-center justify-center shadow-lg">
+                                            <MapPin className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">City</p>
+                                            <p className="text-gray-800 font-semibold">{user.city || 'Not provided'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center space-x-3 p-4 bg-white/60 rounded-xl border border-gray-200/50 hover:bg-white/80 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center shadow-lg">
+                                            <Home className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Address</p>
+                                            <p className="text-gray-800 font-semibold">{user.address || 'Not provided'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center space-x-3 p-4 bg-white/60 rounded-xl border border-gray-200/50 hover:bg-white/80 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg">
+                                            <CreditCard className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">NIC Number</p>
+                                            <p className="text-gray-800 font-semibold">{user.NICNumber || 'Not provided'}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Stats Card */}
+                                    <div className="p-4 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-xl border border-emerald-200 shadow-sm">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-emerald-700">Active</div>
+                                            <div className="text-sm text-emerald-600">Account Status</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button
+                                    onClick={goToEditPage}
+                                    className="group flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                                >
+                                    <Edit3 className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+                                    <span>Edit Account</span>
+                                </button>
+                                
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                    className="group flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <Trash2 className={`w-5 h-5 transition-transform duration-300 ${isDeleting ? 'animate-pulse' : 'group-hover:shake'}`} />
+                                    <span>{isDeleting ? 'Deleting...' : 'Delete Account'}</span>
+                                </button>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="mt-8 pt-6 border-t border-gray-200/50 text-center">
+                                <p className="text-gray-500 text-sm">
+                                    Last updated: {new Date().toLocaleDateString()}
+                                </p>
+                            </div>
                         </div>
                     </div>
-
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        aria-describedby="login-button-description"
-                        className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-105 active:scale-95 
-                            ${isLoading 
-                                ? "bg-gray-400 cursor-not-allowed" 
-                                : "bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 shadow-lg hover:shadow-xl hover:shadow-blue-500/25"
-                            }
-                            focus:outline-none focus:ring-4 focus:ring-blue-500/30`}
-                    >
-                        {isLoading ? (
-                            <div className="flex items-center justify-center space-x-2">
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span>Signing In...</span>
-                            </div>
-                        ) : (
-                            "Login"
-                        )}
-                    </button>
-                </form>
-
-                <div className="mt-8 space-y-3 text-sm text-center text-gray-600 relative z-10">
-                    <p>
-                        Don't have an account? 
-                        <a href="/register" className="text-blue-600 hover:text-purple-600 underline decoration-2 underline-offset-4 transition-colors duration-300 ml-1 font-medium">
-                            Register
-                        </a>
-                    </p>
-                    <p>
-                        Login as Admin 
-                        <a href="/admin-login" className="text-blue-600 hover:text-purple-600 underline decoration-2 underline-offset-4 transition-colors duration-300 ml-1 font-medium">
-                            Admin Login
-                        </a>
-                    </p>
                 </div>
             </div>
 
-            {/* Forgot Password Modal */}
-            {showForgot && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 relative">
-                        <button
-                            onClick={closeForgot}
-                            className="absolute right-3 top-3 p-2 rounded hover:bg-gray-100"
-                            aria-label="Close"
-                        >
-                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-
-                        <h2 className="text-xl font-semibold mb-2">Reset your password</h2>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Enter the email associated with your account. We’ll send you a reset link.
-                        </p>
-
-                        <form onSubmit={handleForgotSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm text-gray-600 mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    value={fpEmail}
-                                    onChange={(e) => setFpEmail(e.target.value)}
-                                    placeholder="you@example.com"
-                                    required
-                                    className="w-full p-3 border rounded-lg bg-white/80 outline-none focus:ring-2 focus:ring-blue-500/30"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={fpLoading}
-                                className={`w-full py-3 rounded-xl text-white font-semibold transition-all ${
-                                    fpLoading
-                                        ? "bg-gray-400 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
-                                }`}
-                            >
-                                {fpLoading ? "Sending…" : "Send reset link"}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <style jsx>{`
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-2px); }
+                    75% { transform: translateX(2px); }
+                }
+                .group:hover .group-hover\\:shake {
+                    animation: shake 0.5s ease-in-out;
+                }
+            `}</style>
         </div>
     );
 }
