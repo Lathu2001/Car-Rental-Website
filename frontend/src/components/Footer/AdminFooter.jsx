@@ -118,9 +118,9 @@ const AdminFooter = () => {
                   </div>
                 </div>
 
-                <a href="mailto:Isgaholdings@gmail.com" className="flex items-center gap-3 text-gray-300 hover:text-cyan-300">
+                <a href="mailto:Isgaenterprise@gmail.com" className="flex items-center gap-3 text-gray-300 hover:text-cyan-300">
                   <Mail className="w-5 h-5 text-red-400" />
-                  <span className="text-sm">Isgaholdings@gmail.com</span>
+                  <span className="text-sm">Isgaenterprise@gmail.com</span>
                 </a>
 
                 <div className="flex items-start gap-3 text-gray-300">
