@@ -497,7 +497,7 @@ const Car = () => {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}>
-                        {formatCurrency(car.longPeriodRentPerDay)}/30+
+                        {formatCurrency(car.longPeriodRentPerDay)}/30+ day
                       </span>
                     </div>
                   </div>
